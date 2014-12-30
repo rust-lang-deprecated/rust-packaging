@@ -38,7 +38,7 @@ os.mkdir(TEMP_DIR)
 
 # Download rust manifest
 rust_manifest_name = "channel-rustc-" + channel
-remote_rust_manifest = SERVER_ADDRESS + "/" + RUST_DIST_FOLDER + "/" + rust_manifest_name
+remote_rust_manifest = os.path.join(SERVER_ADDRESS, RUST_DIST_FOLDER, rust_manifest_name)
 print "rust manifest: " + remote_rust_manifest
 cwd = os.getcwd()
 os.chdir(TEMP_DIR)
@@ -50,7 +50,7 @@ if retval != 0:
 
 # Get list of artifacts for target
 rust_artifacts = []
-for line in open(TEMP_DIR + "/" + rust_manifest_name):
+for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
     if target in line:
         rust_artifacts += [line]
 
@@ -61,7 +61,7 @@ if channel != "nightly":
     # Get the source artifact from which we'll dig out the version number
     # in order to figure out which cargo to pair with
     source = None
-    for line in open(TEMP_DIR + "/" + rust_manifest_name):
+    for line in open(os.path.join(TEMP_DIR,rust_manifest_name)):
         # Hack: should be looking for -src, but currently source tarballs are named somewhat ambiguously
         if "x86" not in line and "i686" not in line:
             source = line
@@ -72,10 +72,11 @@ if channel != "nightly":
 # Download cargo manifest
 cargo_manifest_name = "channel-cargo-" + channel
 if cargo_archive_dir == None:
-    remote_cargo_manifest = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_manifest_name
+    remote_cargo_manifest = os.path.join(
+        SERVER_ADDRESS, CARGO_DIST_FOLDER, cargo_manifest_name)
 else:
-    remote_cargo_manifest = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_archive_date + \
-                            "/" + cargo_manifest_name
+    remote_cargo_manifest = os.path.join(
+        SERVER_ADDRESS, CARGO_DIST_FOLDER, cargo_archive_date  cargo_manifest_name)
 
 # Get artifacts for target
 

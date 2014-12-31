@@ -35,3 +35,8 @@ $ ./package-rust.py --target=x86_64-pc-windows-gnu --exe --msi
 `--pkg`, `--exe`, and `--msi` are optional, producing
 platform-specific installers *in addition* to the tarball
 installer. These only work when run on OS X or Windows.
+
+# License
+
+Licensed under the same terms as the Rust compiler, now and
+forevermore.

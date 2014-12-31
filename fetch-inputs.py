@@ -6,12 +6,8 @@ target = None
 channel = None
 
 for arg in sys.argv:
-    if arg == "--nightly":
-        channel = "nightly"
-    elif arg == "--beta":
-        channel = "beta"
-    elif arg == "--stable":
-        channel = "stable"
+    if "--channel" in arg:
+        channel = arg.split("=")[1]
     elif "--target" in arg:
         target = arg.split("=")[1]
 
@@ -20,7 +16,7 @@ print "target: " + str(target)
 print
 
 if channel == None:
-    print "specify either --nightly, --beta, or --stable"
+    print "specify --channel"
     sys.exit(1)
 if target == None:
     print "specify --target"

@@ -15,7 +15,7 @@ work.
 The easiest way to do this is just:
 
 ```
-$ ./fetch-inputs.py --target=x86_64-unknown-linux-gnu --nightly # or --beta, --stable
+$ ./fetch-inputs.py --target=x86_64-unknown-linux-gnu --nightly
 ```
 
 Which will fetch the official binaries that correspond to the given

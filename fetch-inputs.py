@@ -26,7 +26,7 @@ if target == None:
     print "specify --target"
     sys.exit(1)
 
-SERVER_ADDRESS = "https://static.rust-lang.org"
+SERVER_ADDRESS = os.getenv("RUST_DIST_SERVER", "https://static.rust-lang.org")
 RUST_DIST_FOLDER = "dist"
 CARGO_DIST_FOLDER = "cargo-dist"
 TEMP_DIR = "./tmp"

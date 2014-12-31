@@ -109,7 +109,37 @@ if retval != 0:
     print "combine-installer failed"
     sys.exit(1)
 
-# TODO Produce .pkg
+# Create the LICENSE.txt file used in some GUI installers
+license_file = TEMP_DIR + "/LICENSE.txt"
+cmd = "cat " + \
+    rustc_dir + "/COPYRIGHT " + rustc_dir + "/LICENSE-APACHE " + rustc_dir + "/LICENSE-MIT " + \
+    "> " + license_file
+retval = subprocess.call(["sh", "-c", cmd])
+if retval != 0:
+    print "creating license failed"
+    sys.exit(1)
+
+if make_pkg:
+    print "crating .pkg"
+    os.mkdir(TEMP_DIR + "/pkg")
+    shutil.copytree(TEMP_DIR + "/work/" + package_name, TEMP_DIR + "/pkg/root")
+    os.mkdir(TEMP_DIR + "/pkg/res")
+    shutil.copyfile(TEMP_DIR + "/LICENSE.txt", TEMP_DIR + "/pkg/res/LICENSE.txt")
+    shutil.copyfile("./pkg/welcome.rtf", TEMP_DIR + "/pkg/res/welcome.rtf")
+    shutil.copyfile("./gfx/rust-logo.png", TEMP_DIR + "/pkg/res/rust-logo.png")
+    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rust " + \
+        "--root " + TEMP_DIR + "/pkg/root " + TEMP_DIR + "/pkg/rust.pkg"
+    retval = subprocess.call(["sh", "-c", pkgbuild_cmd])
+    if retval != 0:
+        print "pkgbuild failed"
+        sys.exit(1)
+    productbuild_cmd = "productbuild --distribution ./pkg/Distribution.xml " + \
+        "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \
+        "--package-path " + TEMP_DIR + "/pkg"
+    retval = subprocess.call(["sh", "-c", productbuild_cmd])
+    if retval != 0:
+        print "productbuild failed"
+        sys.exit(1)
 
 # TODO Produce .exe
 

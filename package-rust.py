@@ -41,6 +41,9 @@ if os.path.isdir(TEMP_DIR):
     shutil.rmtree(TEMP_DIR)
 os.mkdir(TEMP_DIR)
 
+if not os.path.isdir(OUTPUT_DIR):
+    os.mkdir(OUTPUT_DIR)
+
 # The names of the packages that need to be combined via rust-installer
 components = [RUSTC_PACKAGE_NAME, "cargo", "rust-docs"]
 if "pc-windows-gnu" in target:

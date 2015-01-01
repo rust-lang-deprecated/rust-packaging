@@ -13,6 +13,7 @@ for arg in sys.argv:
 
 print
 print "target: " + str(target)
+print "channel: " + str(channel)
 print
 
 if channel == None:

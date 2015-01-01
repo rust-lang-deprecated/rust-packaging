@@ -144,10 +144,10 @@ run(["tar", "xzf", INPUT_DIR + "/" + source_tarball, "-C", TEMP_DIR])
 source_dir = os.path.join(TEMP_DIR, source_tarball.replace("-src.tar.gz", ""))
 
 for line in open(source_dir + "/mk/main.mk"):
-    if "CFG_RELEASE_NUM" in line:
+    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM == None:
         CFG_RELEASE_NUM = line.split("=")[1].strip()
         assert len(CFG_RELEASE_NUM) > 0
-    if "CFG_BETA_CYCLE" in line:
+    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE == None:
         CFG_BETA_CYCLE = line.split("=")[1].strip()
         # NB: This can be an empty string
 

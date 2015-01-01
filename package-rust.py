@@ -152,6 +152,10 @@ for line in open(source_dir + "/mk/main.mk"):
         # NB: This can be an empty string
 
 assert CFG_RELEASE_NUM != None
+
+# FIXME Temporary hack
+if CFG_BETA_CYCLE == None:
+    CFG_BETA_CYCLE = ""
 assert CFG_BETA_CYCLE != None
 
 # Guess the channel from the source tarball

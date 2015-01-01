@@ -233,7 +233,7 @@ if make_exe:
     os.rename(orig_mingw_dir, mingw_dir)
 
     # Remove the installer files we don't need
-    for dir_and_component in [(rustc_dir, "rustc"), (docs_dir, "rustc-docs"), (mingw_dir, "rustc-mingw")]:
+    for dir_and_component in [(rustc_dir, "rustc"), (docs_dir, "rust-docs"), (mingw_dir, "rust-mingw")]:
         dir_ = dir_and_component[0]
         component = dir_and_component[1]
         for file_ in ["components", "install.sh", "rust-installer-version"]:
@@ -241,11 +241,11 @@ if make_exe:
         os.remove(dir_ + "/manifest-" + component + ".in")
 
     # Copy installer files, etc.
-    os.copyfile("./exe/rust.iss", exe_temp_dir + "/rust.iss")
-    os.copyfile("./exe/modpath.iss", exe_temp_dir + "/modpath.iss")
-    os.copyfile("./exe/upgrade.iss", exe_temp_dir + "/upgrade.iss")
-    os.copyfile("./gfx/rust-logo.ico", exe_temp_dir + "/rust-logo.ico")
-    os.copyfile(TEMP_DIR + "/LICENSE.txt", exe_temp_dir + "/LICENSE.txt")
+    shutil.copyfile("./exe/rust.iss", exe_temp_dir + "/rust.iss")
+    shutil.copyfile("./exe/modpath.iss", exe_temp_dir + "/modpath.iss")
+    shutil.copyfile("./exe/upgrade.iss", exe_temp_dir + "/upgrade.iss")
+    shutil.copyfile("./gfx/rust-logo.ico", exe_temp_dir + "/rust-logo.ico")
+    shutil.copyfile(TEMP_DIR + "/LICENSE.txt", exe_temp_dir + "/LICENSE.txt")
 
     cwd=os.getcwd()
     os.chdir(exe_temp_dir)
@@ -253,6 +253,6 @@ if make_exe:
     os.chdir(cwd)
 
     exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
-    os.copyfile(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
+    shutil.move(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
 # TODO Produce .msi

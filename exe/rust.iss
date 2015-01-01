@@ -41,6 +41,7 @@ Name: modifypath; Description: &Add {app}\bin to your PATH (recommended)
 [Components]
 Name: rust; Description: "Rust compiler and standard crates"; Types: full compact custom; Flags: fixed
 Name: gcc; Description: "Linker and platform libraries"; Types: full
+Name: docs; Description: "HTML documentation"; Types: full
 
 [Files]
 Source: "rustc/*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Components: rust

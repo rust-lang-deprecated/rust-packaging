@@ -59,6 +59,7 @@ if "pc-windows-gnu" in target:
 inputs = []
 version = None
 rustc_installer = None
+cargo_installer = None
 docs_installer = None
 mingw_installer = None
 source_tarball = None
@@ -84,6 +85,8 @@ for component in components:
         p = s.find(target)
         version = s[:p - 1]
         rustc_installer = component_installer
+    if component == "cargo":
+        cargo_installer = component_installer
     if component == "rust-docs":
         docs_installer = component_installer
     if component == "rust-mingw":
@@ -215,25 +218,32 @@ if make_exe:
     print "creating .exe"
     assert docs_installer != None
     assert mingw_installer != None
+    assert cargo_installer != None
     exe_temp_dir = TEMP_DIR + "/exe"
     os.mkdir(exe_temp_dir)
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + docs_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + mingw_installer, "-C", exe_temp_dir])
+    run(["tar", "xzf", INPUT_DIR + "/" + cargo_installer, "-C", exe_temp_dir])
     orig_rustc_dir = exe_temp_dir + "/" + rustc_installer.replace(".tar.gz", "")
     orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "")
     orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "")
+    orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "")
 
     # Move these to locations needed by the iscc script
     rustc_dir = exe_temp_dir + "/rustc"
     docs_dir = exe_temp_dir + "/rust-docs"
     mingw_dir = exe_temp_dir + "/rust-mingw"
+    cargo_dir = exe_temp_dir + "/cargo"
     os.rename(orig_rustc_dir, rustc_dir)
     os.rename(orig_docs_dir, docs_dir)
     os.rename(orig_mingw_dir, mingw_dir)
+    os.rename(orig_cargo_dir, cargo_dir)
 
     # Remove the installer files we don't need
-    for dir_and_component in [(rustc_dir, "rustc"), (docs_dir, "rust-docs"), (mingw_dir, "rust-mingw")]:
+    dir_comp_pairs = [(rustc_dir, "rustc"), (docs_dir, "rust-docs"),
+                      (mingw_dir, "rust-mingw"), (cargo_dir, "cargo")]
+    for dir_and_component in dir_comp_pairs:
         dir_ = dir_and_component[0]
         component = dir_and_component[1]
         for file_ in ["components", "install.sh", "rust-installer-version"]:

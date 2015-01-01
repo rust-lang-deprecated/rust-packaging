@@ -20,7 +20,7 @@ DisableProgramGroupPage=true
 DisableReadyPage=true
 DisableStartupPrompt=true
 
-OutputDir=.\dist\
+OutputDir=.\
 SourceDir=.\
 OutputBaseFilename={#CFG_PACKAGE_NAME}-{#CFG_BUILD}
 DefaultDirName={sd}\Rust

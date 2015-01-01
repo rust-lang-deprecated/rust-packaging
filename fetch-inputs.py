@@ -54,7 +54,7 @@ os.chdir(cwd)
 # Get list of rust artifacts for target
 rust_artifacts = []
 for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
-    if target in line:
+    if target in line and ".tar.gz" in line:
         rust_artifacts += [line.rstrip()]
 assert len(rust_artifacts) > 0
 print "rust artifacts: " + str(rust_artifacts)
@@ -65,15 +65,14 @@ print "rust artifacts: " + str(rust_artifacts)
 # dist builds across platforms on the buildbot prior to uploading.
 rust_source = None
 for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
-    # Hack: should be looking for -src, but currently source tarballs are named somewhat ambiguously
-    if "x86" not in line and "i686" not in line:
+    if "-src" in line:
         rust_source = line.rstrip()
 assert rust_source != None
 print "rust source: " + rust_source
 
 # Download the source
 cwd = os.getcwd()
-os.chdir(TEMP_DIR)
+os.chdir(IN_DIR)
 full_rust_source = remote_rust_dir + "/" + rust_source
 retval = subprocess.call(["curl", "-f", "-O", full_rust_source])
 if retval != 0:
@@ -85,14 +84,11 @@ os.chdir(cwd)
 # If it's beta or stable then it's paired with a specific revision from the cargo-snap.txt file.
 cargo_archive_date = None
 if channel != "nightly":
-    cwd = os.getcwd()
-    os.chdir(TEMP_DIR)
-    retval = subprocess.call(["tar", "xzf", rust_source])
+    retval = subprocess.call(["tar", "xzf", IN_DIR + "/" + rust_source, "-C", TEMP_DIR])
     if retval != 0:
         print "untarring source failed"
         sys.exit(1)
-    os.chdir(cwd)
-    rust_source_dir = os.path.join(TEMP_DIR, rust_source.replace(".tar.gz", ""))
+    rust_source_dir = os.path.join(TEMP_DIR, rust_source.replace("-src.tar.gz", ""))
 
     # Pull the version number *out of the makefiles*. Seriously.
     version = None

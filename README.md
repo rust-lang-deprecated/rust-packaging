@@ -10,7 +10,8 @@ in a variety of formats.
 First you need to acquire the components that make up the Rust
 installation, rustc, cargo, rust-docs, and - on Windows - rust-mingw,
 containing portions of the mingw toolchain necessary to make Rust
-work.
+work, as well as the corresponding source tarball (which is used
+to fish out some version information, yech).
 
 The easiest way to do this is just:
 

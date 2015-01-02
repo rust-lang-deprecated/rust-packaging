@@ -13,9 +13,10 @@ containing portions of the mingw toolchain necessary to make Rust
 work, as well as the corresponding source tarball (which is used to
 fish out some version information, yech). *Note: neither the OS X nor
 Windows builds actually produce source tarballs at the moment. It
-would be much better for the binary tarballs to include the
-information the build wants (but also would be good for those builds
-to produce source tarballs).*
+would be much better for the binary tarballs to [include the
+information](https://github.com/rust-lang/rust/pull/20388) the build
+wants (but also would be good for those builds to produce source
+tarballs).*
 
 The easiest way to do this is just:
 

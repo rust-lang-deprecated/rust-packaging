@@ -190,7 +190,7 @@ else:
     sys.exit(1)
 
 # This should be the same as the name on the tarballs
-CFG_PACKAGE_NAME="rust-" + CFG_PACKAGE_VERS
+CFG_PACKAGE_NAME=COMBINED_PACKAGE_NAME + CFG_PACKAGE_VERS
 CFG_BUILD=target
 
 os.environ["CFG_RELEASE_NUM"] = CFG_RELEASE_NUM

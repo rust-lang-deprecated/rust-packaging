@@ -118,7 +118,7 @@ if cargo_archive_date == None:
 else:
     remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_archive_date
 
-cargo_manifest_name = "channel-cargo-" + channel
+cargo_manifest_name = "channel-cargo-nightly"
 remote_cargo_manifest = remote_cargo_dir + "/" + cargo_manifest_name
 
 print "cargo manifest: " + remote_cargo_manifest

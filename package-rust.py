@@ -39,8 +39,8 @@ def run(args):
 INPUT_DIR = "./in"
 OUTPUT_DIR = "./out"
 TEMP_DIR = "./tmp"
-RUSTC_PACKAGE_NAME = "rust"
-COMBINED_PACKAGE_NAME = "rust-combined"
+RUSTC_PACKAGE_NAME = "rustc"
+COMBINED_PACKAGE_NAME = "rust"
 
 # Create the temp directory
 if os.path.isdir(TEMP_DIR):

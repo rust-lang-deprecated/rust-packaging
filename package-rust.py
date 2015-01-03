@@ -129,9 +129,7 @@ run(["sh", "./rust-installer/combine-installers.sh",
 
 # Create the LICENSE.txt file used in some GUI installers
 license_file = TEMP_DIR + "/LICENSE.txt"
-cmd = "cat " + \
-    rustc_dir + "/COPYRIGHT " + rustc_dir + "/LICENSE-APACHE " + rustc_dir + "/LICENSE-MIT " + \
-    "> " + license_file
+cmd = "cat {0}/COPYRIGHT {0}/LICENSE-APACHE {0}/LICENSE-MIT > {1}".format(rustc_dir, license_file)
 run(["sh", "-c", cmd])
 
 # Fish out the following Makefile variables from the source code or rebuild them somehow.

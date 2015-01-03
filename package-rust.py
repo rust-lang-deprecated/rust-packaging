@@ -53,7 +53,7 @@ if not os.path.isdir(OUTPUT_DIR):
 # The names of the packages that need to be combined via rust-installer
 components = [RUSTC_PACKAGE_NAME, "cargo", "rust-docs"]
 if "pc-windows-gnu" in target:
-    components += ["rust-mingw"]
+    components.append("rust-mingw")
 
 # Now find the names of the tarballs that belong to those components
 inputs = []

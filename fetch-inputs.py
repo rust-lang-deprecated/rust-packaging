@@ -56,7 +56,7 @@ os.chdir(cwd)
 rust_artifacts = []
 for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
     if target in line and ".tar.gz" in line:
-        rust_artifacts += [line.rstrip()]
+        rust_artifacts.append(line.rstrip())
 assert len(rust_artifacts) > 0
 print "rust artifacts: " + str(rust_artifacts)
 
@@ -134,7 +134,7 @@ os.chdir(cwd)
 cargo_artifacts = []
 for line in open(os.path.join(TEMP_DIR, cargo_manifest_name)):
     if target in line:
-        cargo_artifacts += [line.rstrip()]
+        cargo_artifacts.append(line.rstrip())
 assert len(cargo_artifacts) > 0
 print "cargo artifacts: " + str(cargo_artifacts)
 

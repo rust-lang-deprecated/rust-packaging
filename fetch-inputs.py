@@ -114,7 +114,7 @@ print "cargo date: " + str(cargo_archive_date)
 
 # Download cargo manifest
 if cargo_archive_date is None:
-    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER 
+    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER
 else:
     remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_archive_date
 

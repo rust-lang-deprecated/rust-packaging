@@ -123,7 +123,7 @@ run(["sh", "./rust-installer/combine-installers.sh",
      "--legacy-manifest-dirs=rustlib,cargo",
      "--input-tarballs=" + tarball_list,
      "--non-installed-overlay=" + overlay_dir
- ])
+])
 
 # Everything below here is used for producing non-rust-installer packaging
 

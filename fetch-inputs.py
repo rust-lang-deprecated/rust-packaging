@@ -113,10 +113,9 @@ if channel != "nightly":
 print "cargo date: " + str(cargo_archive_date)
 
 # Download cargo manifest
-if cargo_archive_date is None:
-    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER
-else:
-    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_archive_date
+remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER
+if cargo_archive_date is not None:
+    remote_cargo_dir += "/" + cargo_archive_date
 
 cargo_manifest_name = "channel-cargo-nightly"
 remote_cargo_manifest = remote_cargo_dir + "/" + cargo_manifest_name

@@ -26,7 +26,7 @@ print "pkg: " + str(make_pkg)
 print "msi: " + str(make_msi)
 print
 
-if target == None:
+if target is None:
     print "specify --target"
     sys.exit(1)
 
@@ -77,7 +77,7 @@ for component in components:
     if not component_installer:
         print "unable to find installer for component " + component + ", target " + target
         sys.exit(1)
-    inputs += [INPUT_DIR + "/" + component_installer]
+    inputs.append(INPUT_DIR + "/" + component_installer)
 
     # Extract the version from the filename
     if component == RUSTC_PACKAGE_NAME:
@@ -93,9 +93,9 @@ for component in components:
         mingw_installer = component_installer
 
 
-assert version != None
-assert rustc_installer != None
-assert source_tarball != None
+assert version is not None
+assert rustc_installer is not None
+assert source_tarball is not None
 
 # Set up the overlay of license info
 run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", TEMP_DIR, ])
@@ -147,19 +147,19 @@ run(["tar", "xzf", INPUT_DIR + "/" + source_tarball, "-C", TEMP_DIR])
 source_dir = os.path.join(TEMP_DIR, source_tarball.replace("-src.tar.gz", ""))
 
 for line in open(source_dir + "/mk/main.mk"):
-    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM == None:
+    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM is None:
         CFG_RELEASE_NUM = line.split("=")[1].strip()
         assert len(CFG_RELEASE_NUM) > 0
-    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE == None:
+    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE is None:
         CFG_BETA_CYCLE = line.split("=")[1].strip()
         # NB: This can be an empty string
 
-assert CFG_RELEASE_NUM != None
+assert CFG_RELEASE_NUM is not None
 
 # FIXME Temporary hack
-if CFG_BETA_CYCLE == None:
+if CFG_BETA_CYCLE is None:
     CFG_BETA_CYCLE = ""
-assert CFG_BETA_CYCLE != None
+assert CFG_BETA_CYCLE is not None
 
 # Guess the channel from the source tarball
 channel = None
@@ -216,9 +216,9 @@ if make_pkg:
 
 if make_exe:
     print "creating .exe"
-    assert docs_installer != None
-    assert mingw_installer != None
-    assert cargo_installer != None
+    assert docs_installer is not None
+    assert mingw_installer is not None
+    assert cargo_installer is not None
     exe_temp_dir = TEMP_DIR + "/exe"
     os.mkdir(exe_temp_dir)
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])

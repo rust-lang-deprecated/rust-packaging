@@ -16,10 +16,10 @@ print "target: " + str(target)
 print "channel: " + str(channel)
 print
 
-if channel == None:
+if channel is None:
     print "specify --channel"
     sys.exit(1)
-if target == None:
+if target is None:
     print "specify --target"
     sys.exit(1)
 
@@ -56,7 +56,7 @@ os.chdir(cwd)
 rust_artifacts = []
 for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
     if target in line and ".tar.gz" in line:
-        rust_artifacts += [line.rstrip()]
+        rust_artifacts.append(line.rstrip())
 assert len(rust_artifacts) > 0
 print "rust artifacts: " + str(rust_artifacts)
 
@@ -68,7 +68,7 @@ rust_source = None
 for line in open(os.path.join(TEMP_DIR, rust_manifest_name)):
     if "-src" in line:
         rust_source = line.rstrip()
-assert rust_source != None
+assert rust_source is not None
 print "rust source: " + rust_source
 
 # Download the source
@@ -99,7 +99,7 @@ if channel != "nightly":
             assert len(version) > 0
             break
 
-    assert version != None
+    assert version is not None
 
     # Search the cargo snap database for this version
     for line in open("cargo-revs.txt"):
@@ -108,15 +108,14 @@ if channel != "nightly":
             assert len(cargo_archive_date) > 0
             break
 
-    assert cargo_archive_date != None
+    assert cargo_archive_date is not None
 
 print "cargo date: " + str(cargo_archive_date)
 
 # Download cargo manifest
-if cargo_archive_date == None:
-    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER 
-else:
-    remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER + "/" + cargo_archive_date
+remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER
+if cargo_archive_date is not None:
+    remote_cargo_dir += "/" + cargo_archive_date
 
 cargo_manifest_name = "channel-cargo-nightly"
 remote_cargo_manifest = remote_cargo_dir + "/" + cargo_manifest_name
@@ -134,7 +133,7 @@ os.chdir(cwd)
 cargo_artifacts = []
 for line in open(os.path.join(TEMP_DIR, cargo_manifest_name)):
     if target in line:
-        cargo_artifacts += [line.rstrip()]
+        cargo_artifacts.append(line.rstrip())
 assert len(cargo_artifacts) > 0
 print "cargo artifacts: " + str(cargo_artifacts)
 

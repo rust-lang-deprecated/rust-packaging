@@ -26,7 +26,7 @@ print "pkg: " + str(make_pkg)
 print "msi: " + str(make_msi)
 print
 
-if target == None:
+if target is None:
     print "specify --target"
     sys.exit(1)
 
@@ -53,7 +53,7 @@ if not os.path.isdir(OUTPUT_DIR):
 # The names of the packages that need to be combined via rust-installer
 components = [RUSTC_PACKAGE_NAME, "cargo", "rust-docs"]
 if "pc-windows-gnu" in target:
-    components += ["rust-mingw"]
+    components.append("rust-mingw")
 
 # Now find the names of the tarballs that belong to those components
 inputs = []
@@ -77,7 +77,7 @@ for component in components:
     if not component_installer:
         print "unable to find installer for component " + component + ", target " + target
         sys.exit(1)
-    inputs += [INPUT_DIR + "/" + component_installer]
+    inputs.append(INPUT_DIR + "/" + component_installer)
 
     # Extract the version from the filename
     if component == RUSTC_PACKAGE_NAME:
@@ -93,9 +93,9 @@ for component in components:
         mingw_installer = component_installer
 
 
-assert version != None
-assert rustc_installer != None
-assert source_tarball != None
+assert version is not None
+assert rustc_installer is not None
+assert source_tarball is not None
 
 # Set up the overlay of license info
 run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", TEMP_DIR, ])
@@ -123,15 +123,13 @@ run(["sh", "./rust-installer/combine-installers.sh",
      "--legacy-manifest-dirs=rustlib,cargo",
      "--input-tarballs=" + tarball_list,
      "--non-installed-overlay=" + overlay_dir
- ])
+])
 
 # Everything below here is used for producing non-rust-installer packaging
 
 # Create the LICENSE.txt file used in some GUI installers
 license_file = TEMP_DIR + "/LICENSE.txt"
-cmd = "cat " + \
-    rustc_dir + "/COPYRIGHT " + rustc_dir + "/LICENSE-APACHE " + rustc_dir + "/LICENSE-MIT " + \
-    "> " + license_file
+cmd = "cat {0}/COPYRIGHT {0}/LICENSE-APACHE {0}/LICENSE-MIT > {1}".format(rustc_dir, license_file)
 run(["sh", "-c", cmd])
 
 # Fish out the following Makefile variables from the source code or rebuild them somehow.
@@ -147,19 +145,19 @@ run(["tar", "xzf", INPUT_DIR + "/" + source_tarball, "-C", TEMP_DIR])
 source_dir = os.path.join(TEMP_DIR, source_tarball.replace("-src.tar.gz", ""))
 
 for line in open(source_dir + "/mk/main.mk"):
-    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM == None:
+    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM is None:
         CFG_RELEASE_NUM = line.split("=")[1].strip()
         assert len(CFG_RELEASE_NUM) > 0
-    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE == None:
+    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE is None:
         CFG_BETA_CYCLE = line.split("=")[1].strip()
         # NB: This can be an empty string
 
-assert CFG_RELEASE_NUM != None
+assert CFG_RELEASE_NUM is not None
 
 # FIXME Temporary hack
-if CFG_BETA_CYCLE == None:
+if CFG_BETA_CYCLE is None:
     CFG_BETA_CYCLE = ""
-assert CFG_BETA_CYCLE != None
+assert CFG_BETA_CYCLE is not None
 
 # Guess the channel from the source tarball
 channel = None
@@ -216,9 +214,9 @@ if make_pkg:
 
 if make_exe:
     print "creating .exe"
-    assert docs_installer != None
-    assert mingw_installer != None
-    assert cargo_installer != None
+    assert docs_installer is not None
+    assert mingw_installer is not None
+    assert cargo_installer is not None
     exe_temp_dir = TEMP_DIR + "/exe"
     os.mkdir(exe_temp_dir)
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])

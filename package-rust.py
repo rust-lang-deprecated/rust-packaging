@@ -200,6 +200,17 @@ if make_pkg:
     print "creating .pkg"
     os.mkdir(TEMP_DIR + "/pkg")
     shutil.copytree(TEMP_DIR + "/work/" + package_name, TEMP_DIR + "/pkg/root")
+    # The package root, extracted from a tarball has entirely wrong permissions.
+    # This goes over everything and fixes them.
+    run(["chmod", "-R", "u+rwX,go+rX,go-w", TEMP_DIR + "/pkg/root"])
+    for filename in os.listdir(TEMP_DIR + "/pkg/root/bin"):
+        run(["chmod", "0755", TEMP_DIR + "/pkg/root/bin/" + filename])
+
+    # Remove everything under the root. These all shouldn't be installed.
+    for filename in os.listdir(TEMP_DIR + "/pkg/root"):
+        if os.path.isfile(TEMP_DIR + "/pkg/root/" + filename):
+            run(["rm", TEMP_DIR + "/pkg/root/" + filename])
+
     os.mkdir(TEMP_DIR + "/pkg/res")
     shutil.copyfile(TEMP_DIR + "/LICENSE.txt", TEMP_DIR + "/pkg/res/LICENSE.txt")
     shutil.copyfile("./pkg/welcome.rtf", TEMP_DIR + "/pkg/res/welcome.rtf")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-import sys, os, subprocess, shutil
+import sys, os, subprocess, shutil, datetime
 
 # Parse configuration
 
@@ -31,6 +31,7 @@ if target is None:
     sys.exit(1)
 
 def run(args):
+    print ' '.join(args)
     retval = subprocess.call(args)
     if retval != 0:
         print "call failed: " + str(args)
@@ -44,6 +45,7 @@ COMBINED_PACKAGE_NAME = "rust"
 
 # Create the temp directory
 if os.path.isdir(TEMP_DIR):
+    print "Removing old temp..."
     shutil.rmtree(TEMP_DIR)
 os.mkdir(TEMP_DIR)
 
@@ -131,6 +133,9 @@ run(["sh", "./rust-installer/combine-installers.sh",
 license_file = TEMP_DIR + "/LICENSE.txt"
 cmd = "cat {0}/COPYRIGHT {0}/LICENSE-APACHE {0}/LICENSE-MIT > {1}".format(rustc_dir, license_file)
 run(["sh", "-c", cmd])
+if make_msi:
+    license_rtf = TEMP_DIR + "/LICENSE.rtf"
+    run(["pandoc", "-s", license_file, "-o", license_rtf])
 
 # Fish out the following Makefile variables from the source code or rebuild them somehow.
 # Currently these are needed by the Windows installer.
@@ -174,15 +179,26 @@ else:
 if channel == "stable":
     CFG_RELEASE=CFG_RELEASE_NUM
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
+    # UpgradeCode shoud stay the same for all MSI versions in channel
+    CFG_UPGRADE_CODE="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6"
+    CFG_MSI_VERSION=CFG_RELEASE_NUM
 elif channel == "beta":
     CFG_RELEASE=CFG_RELEASE_NUM + "-beta" + CFG_BETA_CYCLE
     CFG_PACKAGE_VERS="beta"
+    CFG_UPGRADE_CODE="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9"
+    CFG_MSI_VERSION=CFG_RELEASE_NUM + "." + CFG_BETA_CYCLE
 elif channel == "nightly":
     CFG_RELEASE=CFG_RELEASE_NUM + "-nightly"
     CFG_PACKAGE_VERS="nightly"
+    CFG_UPGRADE_CODE="B94FF1C2-2C7B-4859-A08B-546815516FDA"
+    now=datetime.datetime.now()
+    build=now.year*10+now.month*100+now.day
+    CFG_MSI_VERSION=CFG_RELEASE_NUM+"."+str(build)
 elif channel == "dev":
     CFG_RELEASE=CFG_RELEASE_NUM + "-dev"
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-dev"
+    CFG_UPGRADE_CODE="7E6D1349-2773-4792-B8CD-EA2685D86A99"
+    CFG_MSI_VERSION="255.255.65535.99999"
 else:
     print "unknown release channel"
     sys.exit(1)
@@ -191,9 +207,12 @@ else:
 CFG_PACKAGE_NAME=COMBINED_PACKAGE_NAME + "-" + CFG_PACKAGE_VERS
 CFG_BUILD=target
 
+os.environ["CFG_CHANNEL"] = channel
 os.environ["CFG_RELEASE_NUM"] = CFG_RELEASE_NUM
 os.environ["CFG_RELEASE"] = CFG_RELEASE
 os.environ["CFG_PACKAGE_NAME"] = CFG_PACKAGE_NAME
+os.environ["CFG_UPGRADE_CODE"] = CFG_UPGRADE_CODE
+os.environ["CFG_MSI_VERSION"] = CFG_MSI_VERSION
 os.environ["CFG_BUILD"] = CFG_BUILD
 
 if make_pkg:
@@ -223,8 +242,12 @@ if make_pkg:
         "--package-path " + TEMP_DIR + "/pkg"
     run(["sh", "-c", productbuild_cmd])
 
-if make_exe:
-    print "creating .exe"
+if make_exe or make_msi:
+    if make_exe:
+        print "creating .exe"
+    if make_msi:
+        print "creating .msi"
+
     assert docs_installer is not None
     assert mingw_installer is not None
     assert cargo_installer is not None
@@ -239,7 +262,7 @@ if make_exe:
     orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "")
     orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "")
 
-    # Move these to locations needed by the iscc script
+    # Move these to locations needed by the iscc script and wix sources
     rustc_dir = exe_temp_dir + "/rustc"
     docs_dir = exe_temp_dir + "/rust-docs"
     mingw_dir = exe_temp_dir + "/rust-mingw"
@@ -259,19 +282,33 @@ if make_exe:
             os.remove(dir_ + "/" + file_)
         os.remove(dir_ + "/manifest-" + component + ".in")
 
-    # Copy installer files, etc.
-    shutil.copyfile("./exe/rust.iss", exe_temp_dir + "/rust.iss")
-    shutil.copyfile("./exe/modpath.iss", exe_temp_dir + "/modpath.iss")
-    shutil.copyfile("./exe/upgrade.iss", exe_temp_dir + "/upgrade.iss")
-    shutil.copyfile("./gfx/rust-logo.ico", exe_temp_dir + "/rust-logo.ico")
-    shutil.copyfile(TEMP_DIR + "/LICENSE.txt", exe_temp_dir + "/LICENSE.txt")
+    if make_exe:
+        # Copy installer files, etc.
+        shutil.copyfile("./exe/rust.iss", exe_temp_dir + "/rust.iss")
+        shutil.copyfile("./exe/modpath.iss", exe_temp_dir + "/modpath.iss")
+        shutil.copyfile("./exe/upgrade.iss", exe_temp_dir + "/upgrade.iss")
+        shutil.copyfile("./gfx/rust-logo.ico", exe_temp_dir + "/rust-logo.ico")
+        shutil.copyfile(TEMP_DIR + "/LICENSE.txt", exe_temp_dir + "/LICENSE.txt")
 
-    cwd=os.getcwd()
-    os.chdir(exe_temp_dir)
-    run(["iscc", "rust.iss"])
-    os.chdir(cwd)
+        cwd=os.getcwd()
+        os.chdir(exe_temp_dir)
+        run(["iscc", "rust.iss"])
+        os.chdir(cwd)
 
-    exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
-    shutil.move(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
+        exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
+        shutil.move(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
-# TODO Produce .msi
+    if make_msi:
+        # Copy installer files, etc.
+        for f in ("Makefile", "rust.wxs", "remove-duplicates.xsl", "squash-components.xsl"):
+            shutil.copy("./msi/" + f, exe_temp_dir)
+        shutil.copy("./gfx/rust-logo.ico", exe_temp_dir)
+        shutil.copy(TEMP_DIR + "/LICENSE.rtf", exe_temp_dir)
+
+        cwd=os.getcwd()
+        os.chdir(exe_temp_dir)
+        run(["make"])
+        os.chdir(cwd)
+
+        msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"
+        shutil.move(exe_temp_dir + "/" + msifile, OUTPUT_DIR)

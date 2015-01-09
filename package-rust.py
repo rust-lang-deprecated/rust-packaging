@@ -148,16 +148,16 @@ for line in open(source_dir + "/mk/main.mk"):
     if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM is None:
         CFG_RELEASE_NUM = line.split("=")[1].strip()
         assert len(CFG_RELEASE_NUM) > 0
-    if "CFG_BETA_CYCLE" in line and CFG_BETA_CYCLE is None:
-        CFG_BETA_CYCLE = line.split("=")[1].strip()
+    if "CFG_PRERELEASE_VERSION" in line and CFG_PRERELEASE_VERSION is None:
+        CFG_PRERELEASE_VERSION = line.split("=")[1].strip()
         # NB: This can be an empty string
 
 assert CFG_RELEASE_NUM is not None
 
 # FIXME Temporary hack
-if CFG_BETA_CYCLE is None:
-    CFG_BETA_CYCLE = ""
-assert CFG_BETA_CYCLE is not None
+if CFG_PRERELEASE_VERSION is None:
+    CFG_PRERELEASE_VERSION = ""
+assert CFG_PRERELEASE_VERSION is not None
 
 # Guess the channel from the source tarball
 channel = None
@@ -175,8 +175,8 @@ if channel == "stable":
     CFG_RELEASE=CFG_RELEASE_NUM
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
 elif channel == "beta":
-    CFG_RELEASE=CFG_RELEASE_NUM + "-beta" + CFG_BETA_CYCLE
-    CFG_PACKAGE_VERS="beta"
+    CFG_RELEASE=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
+    CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
 elif channel == "nightly":
     CFG_RELEASE=CFG_RELEASE_NUM + "-nightly"
     CFG_PACKAGE_VERS="nightly"

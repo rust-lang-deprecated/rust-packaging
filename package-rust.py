@@ -135,7 +135,7 @@ run(["sh", "-c", cmd])
 # Fish out the following Makefile variables from the source code or rebuild them somehow.
 # Currently these are needed by the Windows installer.
 CFG_RELEASE_NUM = None
-CFG_BETA_CYCLE = None
+CFG_PRERELEASE_VERSION = None
 CFG_RELEASE = None
 CFG_PACKAGE_NAME = None
 CFG_BUILD = None

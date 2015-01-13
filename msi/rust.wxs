@@ -12,6 +12,8 @@
             Compressed="yes" />
 
         <Icon Id="rust.ico" SourceFile="rust-logo.ico" />
+        <Property Id="ApplicationFolderName" Value="Rust-$(env.CFG_CHANNEL)" />
+        <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
         <Property Id="ARPPRODUCTICON" Value="rust.ico" />
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
@@ -26,7 +28,7 @@
         <!-- Installation directory and files are defined in Files.wxs -->
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFilesFolder">
-                <Directory Id="INSTALLDIR" Name="Rust">
+                <Directory Id="APPLICATIONFOLDER" Name="Rust-$(env.CFG_CHANNEL)">
                     <!-- Root directories for every feature should have different IDs for correct work of heat.exe -->
                     <Directory Id="Rustc" Name="." />
                     <Directory Id="Gcc" Name="." />
@@ -36,9 +38,9 @@
             </Directory>
 
             <Component Id="PathEnv" Guid="*">
-                <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[INSTALLDIR]" KeyPath="yes" />
-                <!-- [INSTALLDIR] contains trailing backslash -->
-                <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]bin" Permanent="no" Part="last" Action="set" System="yes" />
+                <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
+                <!-- [APPLICATIONFOLDER] contains trailing backslash -->
+                <Environment Id="PATH" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
             </Component>
 
         </Directory>
@@ -88,6 +90,6 @@
             directly from the license agreement dialog to the feature
             customization dialog.
         -->
-        <UIRef Id="WixUI_FeatureTree" />
+        <UIRef Id="WixUI_Advanced" />
     </Product>
 </Wix>

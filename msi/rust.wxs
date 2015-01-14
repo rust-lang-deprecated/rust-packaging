@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*"
+        Name="Rust $(env.CFG_CHANNEL)"
+        Language="1033"
+        Version="$(env.CFG_MSI_VERSION)"
+        UpgradeCode="$(env.CFG_UPGRADE_CODE)"
+        Manufacturer="Mozilla Foundation">
+        <Package
+            Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
+            InstallerVersion="200"
+            Compressed="yes" />
+
+        <Icon Id="rust.ico" SourceFile="rust-logo.ico" />
+        <Property Id="ApplicationFolderName" Value="Rust-$(env.CFG_CHANNEL)" />
+        <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+        <Property Id="ARPPRODUCTICON" Value="rust.ico" />
+        <!-- txt format is not supported -->
+        <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
+
+        <!--
+            Source media for the installation.
+            Specifies a single cab file to be embedded in the installer's .msi.
+        -->
+        <MediaTemplate EmbedCab="yes" />
+        <!-- <Media Id="1" Layout="Files" /> -->
+
+        <!-- Installation directory and files are defined in Files.wxs -->
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="APPLICATIONFOLDER" Name="Rust-$(env.CFG_CHANNEL)">
+                    <!-- Root directories for every feature should have different IDs for correct work of heat.exe -->
+                    <Directory Id="Rustc" Name="." />
+                    <Directory Id="Gcc" Name="." />
+                    <Directory Id="Docs" Name="." />
+                    <Directory Id="Cargo" Name="." />
+                </Directory>
+            </Directory>
+
+            <Component Id="PathEnv" Guid="*">
+                <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
+                <!-- [APPLICATIONFOLDER] contains trailing backslash -->
+                <Environment Id="PATH" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
+            </Component>
+
+        </Directory>
+
+        <Feature Id="Rustc"
+                 Title="Rust compiler and standard crates"
+                 Display="0"
+                 Level="1"
+                 AllowAdvertise="no">
+                 <ComponentGroupRef Id="RustcGroup" />
+        </Feature>
+        <Feature Id="Gcc"
+                 Title="Linker and platform libraries"
+                 Display="1"
+                 Level="1"
+                 AllowAdvertise="no">
+                 <ComponentGroupRef Id="GccGroup" />
+        </Feature>
+        <Feature Id="Docs"
+                 Title="HTML documentation"
+                 Display="2"
+                 Level="1"
+                 AllowAdvertise="no">
+                 <ComponentGroupRef Id="DocsGroup" />
+        </Feature>
+        <Feature Id="Cargo"
+                 Title="Cargo, the Rust package manager"
+                 Display="3"
+                 Level="1"
+                 AllowAdvertise="no">
+                 <ComponentGroupRef Id="CargoGroup" />
+        </Feature>
+        <Feature Id="Path"
+                 Title="Add to PATH"
+                 Description="Add Rust to PATH environment variable"
+                 Display="4"
+                 Level="5"
+                 AllowAdvertise="no">
+                 <ComponentRef Id="PathEnv" />
+        </Feature>
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <!--
+            Using the Wix UI library
+
+            With the the WixUI_FeatureTree dialog set the user goes
+            directly from the license agreement dialog to the feature
+            customization dialog.
+        -->
+        <UIRef Id="WixUI_Advanced" />
+    </Product>
+</Wix>

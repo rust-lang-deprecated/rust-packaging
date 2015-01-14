@@ -64,7 +64,6 @@ rustc_installer = None
 cargo_installer = None
 docs_installer = None
 mingw_installer = None
-source_tarball = None
 for component in components:
     component_installer = None
     for filename in os.listdir(INPUT_DIR):
@@ -72,9 +71,6 @@ for component in components:
             # Hack: several components contain 'rust' in the name
             if not (component == "rust" and ("rust-docs" in filename or "rust-mingw" in filename)):
                 component_installer = filename
-
-        if "-src" in filename:
-            source_tarball = filename
 
     if not component_installer:
         print "unable to find installer for component " + component + ", target " + target
@@ -97,7 +93,6 @@ for component in components:
 
 assert version is not None
 assert rustc_installer is not None
-assert source_tarball is not None
 
 # Set up the overlay of license info
 run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", TEMP_DIR, ])
@@ -137,7 +132,7 @@ if make_msi:
     license_rtf = TEMP_DIR + "/LICENSE.rtf"
     run(["pandoc", "-s", license_file, "-o", license_rtf])
 
-# Fish out the following Makefile variables from the source code or rebuild them somehow.
+# Reconstruct the following variables from the Rust makefile from the version number.
 # Currently these are needed by the Windows installer.
 CFG_RELEASE_NUM = None
 CFG_PRERELEASE_VERSION = None
@@ -146,56 +141,50 @@ CFG_PACKAGE_NAME = None
 CFG_BUILD = None
 CFG_PACKAGE_VERS = None
 
-run(["tar", "xzf", INPUT_DIR + "/" + source_tarball, "-C", TEMP_DIR])
-source_dir = os.path.join(TEMP_DIR, source_tarball.replace("-src.tar.gz", ""))
+# Pull the version number out of the version file
+full_version = None
+for line in open(os.path.join(rustc_dir, "version")):
+    print "reported version: " + line
+    full_version = line.split(" ")[0]
 
-for line in open(source_dir + "/mk/main.mk"):
-    if "CFG_RELEASE_NUM" in line and CFG_RELEASE_NUM is None:
-        CFG_RELEASE_NUM = line.split("=")[1].strip()
-        assert len(CFG_RELEASE_NUM) > 0
-    if "CFG_PRERELEASE_VERSION" in line and CFG_PRERELEASE_VERSION is None:
-        CFG_PRERELEASE_VERSION = line.split("=")[1].strip()
-        # NB: This can be an empty string
+assert full_version is not None
+version_number = full_version.split("-")[0]
+prerelease_version = ""
+if "beta." in full_version:
+    prerelease_version = "." + full_version.split(".")[-1]
 
-assert CFG_RELEASE_NUM is not None
-
-# FIXME Temporary hack
-if CFG_PRERELEASE_VERSION is None:
-    CFG_PRERELEASE_VERSION = ""
-assert CFG_PRERELEASE_VERSION is not None
-
-# Guess the channel from the source tarball
+# Guess the channel from the version
 channel = None
-if "nightly" in source_tarball:
+if "nightly" in full_version:
     channel = "nightly"
-elif "beta" in source_tarball:
+elif "beta" in full_version or "alpha" in full_version:
     channel = "beta"
-elif "dev" in source_tarball:
+elif "dev" in full_version:
     channel = "dev"
 else:
     channel = "stable"
 
+CFG_RELEASE_NUM=version
+CFG_RELEASE=full_version
+CFG_PRERELEASE_VERSION=prerelease_version
+
 # Logic reproduced from main.mk
 if channel == "stable":
-    CFG_RELEASE=CFG_RELEASE_NUM
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
     # UpgradeCode shoud stay the same for all MSI versions in channel
     CFG_UPGRADE_CODE="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6"
     CFG_MSI_VERSION=CFG_RELEASE_NUM
 elif channel == "beta":
-    CFG_RELEASE=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
     CFG_UPGRADE_CODE="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9"
-    CFG_MSI_VERSION=CFG_RELEASE_NUM + "." + CFG_BETA_CYCLE
+    CFG_MSI_VERSION=CFG_RELEASE_NUM + "." + CFG_PRERELEASE_VERSION
 elif channel == "nightly":
-    CFG_RELEASE=CFG_RELEASE_NUM + "-nightly"
     CFG_PACKAGE_VERS="nightly"
     CFG_UPGRADE_CODE="B94FF1C2-2C7B-4859-A08B-546815516FDA"
     now=datetime.datetime.now()
     build=now.year*10+now.month*100+now.day
     CFG_MSI_VERSION=CFG_RELEASE_NUM+"."+str(build)
 elif channel == "dev":
-    CFG_RELEASE=CFG_RELEASE_NUM + "-dev"
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-dev"
     CFG_UPGRADE_CODE="7E6D1349-2773-4792-B8CD-EA2685D86A99"
     CFG_MSI_VERSION="255.255.65535.99999"

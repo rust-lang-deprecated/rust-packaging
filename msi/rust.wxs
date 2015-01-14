@@ -9,12 +9,14 @@
         <Package
             Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
             InstallerVersion="200"
+            InstallPrivileges="limited"
             Compressed="yes" />
 
         <Icon Id="rust.ico" SourceFile="rust-logo.ico" />
         <Property Id="ApplicationFolderName" Value="Rust-$(env.CFG_CHANNEL)" />
         <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
         <Property Id="ARPPRODUCTICON" Value="rust.ico" />
+        <Property Id="ARPURLINFOABOUT" Value="http://www.rust-lang.org/" />
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
 
@@ -37,10 +39,16 @@
                 </Directory>
             </Directory>
 
-            <Component Id="PathEnv" Guid="*">
+            <Component Id="PathEnvPerMachine" Guid="*">
+                <Condition>ALLUSERS=1 OR (ALLUSERS=2 AND Privileged)</Condition>
                 <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
                 <!-- [APPLICATIONFOLDER] contains trailing backslash -->
-                <Environment Id="PATH" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
+                <Environment Id="PathPerMachine" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
+            </Component>
+            <Component Id="PathEnvPerUser" Guid="*">
+                <Condition>ALLUSERS="" OR (ALLUSERS=2 AND (NOT Privileged))</Condition>
+                <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
+                <Environment Id="PathPerUser" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="no" />
             </Component>
 
         </Directory>
@@ -79,7 +87,8 @@
                  Display="4"
                  Level="5"
                  AllowAdvertise="no">
-                 <ComponentRef Id="PathEnv" />
+                 <ComponentRef Id="PathEnvPerMachine" />
+                 <ComponentRef Id="PathEnvPerUser" />
         </Feature>
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />

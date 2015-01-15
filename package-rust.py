@@ -59,7 +59,7 @@ if "pc-windows-gnu" in target:
 
 # Now find the names of the tarballs that belong to those components
 inputs = []
-version = None
+package_version = None
 rustc_installer = None
 cargo_installer = None
 docs_installer = None
@@ -81,7 +81,7 @@ for component in components:
     if component == RUSTC_PACKAGE_NAME:
         s = component_installer[len(RUSTC_PACKAGE_NAME) + 1:]
         p = s.find(target)
-        version = s[:p - 1]
+        package_version = s[:p - 1]
         rustc_installer = component_installer
     if component == "cargo":
         cargo_installer = component_installer
@@ -91,7 +91,7 @@ for component in components:
         mingw_installer = component_installer
 
 
-assert version is not None
+assert package_version is not None
 assert rustc_installer is not None
 
 # Set up the overlay of license info
@@ -108,7 +108,7 @@ shutil.copyfile(rustc_dir + "/README.md", overlay_dir + "/README.md")
 
 # Combine the installers
 tarball_list=",".join(inputs)
-package_name=COMBINED_PACKAGE_NAME + "-" + version + "-" + target
+package_name=COMBINED_PACKAGE_NAME + "-" + package_version + "-" + target
 run(["sh", "./rust-installer/combine-installers.sh",
      "--product-name=Rust",
      "--verify-bin=rustc",
@@ -164,7 +164,7 @@ elif "dev" in full_version:
 else:
     channel = "stable"
 
-CFG_RELEASE_NUM=version
+CFG_RELEASE_NUM=version_number
 CFG_RELEASE=full_version
 CFG_PRERELEASE_VERSION=prerelease_version
 
@@ -195,14 +195,23 @@ else:
 # This should be the same as the name on the tarballs
 CFG_PACKAGE_NAME=COMBINED_PACKAGE_NAME + "-" + CFG_PACKAGE_VERS
 CFG_BUILD=target
+CFG_CHANNEL=channel
 
-os.environ["CFG_CHANNEL"] = channel
+os.environ["CFG_CHANNEL"] = CFG_CHANNEL
 os.environ["CFG_RELEASE_NUM"] = CFG_RELEASE_NUM
 os.environ["CFG_RELEASE"] = CFG_RELEASE
 os.environ["CFG_PACKAGE_NAME"] = CFG_PACKAGE_NAME
 os.environ["CFG_UPGRADE_CODE"] = CFG_UPGRADE_CODE
 os.environ["CFG_MSI_VERSION"] = CFG_MSI_VERSION
 os.environ["CFG_BUILD"] = CFG_BUILD
+
+print "CFG_CHANNEL: " + CFG_CHANNEL
+print "CFG_RELEASE_NUM: " + CFG_RELEASE_NUM
+print "CFG_RELEASE: " + CFG_RELEASE
+print "CFG_PACKAGE_NAME: " + CFG_PACKAGE_NAME
+print "CFG_UPGRADE_CODE: " + CFG_UPGRADE_CODE
+print "CFG_MSI_VERSION: " + CFG_MSI_VERSION
+print "CFG_BUILD: " + CFG_BUILD
 
 if make_pkg:
     print "creating .pkg"

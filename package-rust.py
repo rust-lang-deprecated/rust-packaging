@@ -130,7 +130,14 @@ cmd = "cat {0}/COPYRIGHT {0}/LICENSE-APACHE {0}/LICENSE-MIT > {1}".format(rustc_
 run(["sh", "-c", cmd])
 if make_msi:
     license_rtf = TEMP_DIR + "/LICENSE.rtf"
-    run(["pandoc", "-s", license_file, "-o", license_rtf])
+    # Convert plain text to RTF
+    with open(license_file, "rt") as input:
+        with open(license_rtf, "wt") as output:
+            output.write(r"{\rtf1\ansi\deff0{\fonttbl{\f0\fnil\fcharset0 Arial;}}\nowwrap\fs18"+"\n")
+            for line in input.readlines():
+                output.write(line)
+                output.write(r"\line ")
+            output.write("}")
 
 # Reconstruct the following variables from the Rust makefile from the version number.
 # Currently these are needed by the Windows installer.

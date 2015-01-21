@@ -51,6 +51,42 @@
                 <Environment Id="PathPerUser" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="no" />
             </Component>
 
+            <!-- Start Menu shortcuts -->
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="Rust">
+                    <Component Id="RustShellShortcut" Guid="{7DADCD3B-CC53-48EC-84F1-4E6E74D8D542}">
+                        <Shortcut Id="RustShell"
+                                  Name="Rust Shell"
+                                  Description="Opens Command Prompt with Rust tools directory added to the PATH"
+                                  Target="[SystemFolder]CMD.exe"
+                                  Arguments="/K path [APPLICATIONFOLDER]bin;%PATH%"
+                                  WorkingDirectory="PersonalFolder">
+                            <Icon Id="rust2.ico" SourceFile="rust-logo.ico" />
+                        </Shortcut>
+                        <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
+                                       Name="RustShell"
+                                       Type="integer"
+                                       Value="1"
+                                       KeyPath="yes" />
+                        <RemoveFolder Id="ApplicationProgramsFolder1" On="uninstall" />
+                    </Component>
+                    <Component Id="DocIndexShortcut" Guid="{C13574AD-F9D4-41DF-A630-936C100C6303}">
+                        <Shortcut Id="RustDocs"
+                                  Name="Rust Documentation"
+                                  Description="Opens Rust HTML documentation in the default browser"
+                                  Target="[APPLICATIONFOLDER]share\doc\rust\html\index.html" />
+                        <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
+                                       Name="RustDocs"
+                                       Type="integer"
+                                       Value="1"
+                                       KeyPath="yes" />
+                        <RemoveFolder Id="ApplicationProgramsFolder2" On="uninstall" />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id="PersonalFolder" />
+
         </Directory>
 
         <Feature Id="Rustc"
@@ -59,9 +95,11 @@
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="RustcGroup" />
+                 <ComponentRef Id="RustShellShortcut" />
         </Feature>
         <Feature Id="Gcc"
                  Title="Linker and platform libraries"
+                 Description="If you choose to not install this component, you will require an external MinGW installation in order to create executables and libraries."
                  Display="1"
                  Level="1"
                  AllowAdvertise="no">
@@ -73,6 +111,7 @@
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="DocsGroup" />
+                 <ComponentRef Id="DocIndexShortcut" />
         </Feature>
         <Feature Id="Cargo"
                  Title="Cargo, the Rust package manager"

@@ -37,6 +37,12 @@ def run(args):
         print "call failed: " + str(args)
         sys.exit(1)
 
+# Move file with target overwrite
+def move_file(source, target):
+    try: os.remove(target)
+    except OSError: pass
+    shutil.move(source, target)
+
 INPUT_DIR = "./in"
 OUTPUT_DIR = "./out"
 TEMP_DIR = "./tmp"
@@ -301,7 +307,7 @@ if make_exe or make_msi:
         os.chdir(cwd)
 
         exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
-        shutil.move(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
+        move_file(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
     if make_msi:
         # Copy installer files, etc.
@@ -316,4 +322,4 @@ if make_exe or make_msi:
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"
-        shutil.move(exe_temp_dir + "/" + msifile, OUTPUT_DIR)
+        move_file(exe_temp_dir + "/" + msifile, OUTPUT_DIR + "/" + msifile)

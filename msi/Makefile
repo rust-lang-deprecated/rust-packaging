@@ -31,7 +31,8 @@ LIGHT_FLAGS= -nologo -ext WixUIExtension
 all: $(MSI).msi
 
 $(MSI).msi: $(OBJS)
-	$(LIGHT) $(LIGHT_FLAGS) -out $@ $(OBJS)
+	$(LIGHT) $(LIGHT_FLAGS) -out $@ $(OBJS) -sice:ICE57 
+	# ICE57 wrongly complains about the shortcuts
 
 .wxs.wixobj:
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ $^

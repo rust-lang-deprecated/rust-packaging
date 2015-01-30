@@ -9,7 +9,7 @@
         <Package
             Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
             InstallerVersion="200"
-            InstallPrivileges="limited"
+            InstallPrivileges="elevated"
             Compressed="yes" />
 
         <Icon Id="rust.ico" SourceFile="rust-logo.ico" />
@@ -17,6 +17,7 @@
         <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
         <Property Id="ARPPRODUCTICON" Value="rust.ico" />
         <Property Id="ARPURLINFOABOUT" Value="http://www.rust-lang.org/" />
+        <Property Id="ALLUSERS" Value="2" />
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
 
@@ -39,17 +40,53 @@
                 </Directory>
             </Directory>
 
-            <Component Id="PathEnvPerMachine" Guid="*">
+            <Component Id="PathEnvPerMachine" Guid="{5C841EF4-EB7A-4A1E-9E0F-5477040E6339}">
                 <Condition>ALLUSERS=1 OR (ALLUSERS=2 AND Privileged)</Condition>
-                <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
+                <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
                 <!-- [APPLICATIONFOLDER] contains trailing backslash -->
                 <Environment Id="PathPerMachine" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
             </Component>
-            <Component Id="PathEnvPerUser" Guid="*">
+            <Component Id="PathEnvPerUser" Guid="{20CFC7FC-5580-429D-9DE7-10DC5FD0314B}">
                 <Condition>ALLUSERS="" OR (ALLUSERS=2 AND (NOT Privileged))</Condition>
-                <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
+                <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
                 <Environment Id="PathPerUser" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="no" />
             </Component>
+
+            <!-- Start Menu shortcuts -->
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="Rust">
+                    <Component Id="RustShellShortcut" Guid="{7DADCD3B-CC53-48EC-84F1-4E6E74D8D542}">
+                        <Shortcut Id="RustShell"
+                                  Name="Rust Shell"
+                                  Description="Opens Command Prompt with Rust tools directory added to the PATH"
+                                  Target="[SystemFolder]CMD.exe"
+                                  Arguments="/K path [APPLICATIONFOLDER]bin;%PATH%"
+                                  WorkingDirectory="PersonalFolder">
+                            <Icon Id="rust2.ico" SourceFile="rust-logo.ico" />
+                        </Shortcut>
+                        <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
+                                       Name="RustShell"
+                                       Type="integer"
+                                       Value="1"
+                                       KeyPath="yes" />
+                        <RemoveFolder Id="ApplicationProgramsFolder1" On="uninstall" />
+                    </Component>
+                    <Component Id="DocIndexShortcut" Guid="{C13574AD-F9D4-41DF-A630-936C100C6303}">
+                        <Shortcut Id="RustDocs"
+                                  Name="Rust Documentation"
+                                  Description="Opens Rust HTML documentation in the default browser"
+                                  Target="[APPLICATIONFOLDER]share\doc\rust\html\index.html" />
+                        <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
+                                       Name="RustDocs"
+                                       Type="integer"
+                                       Value="1"
+                                       KeyPath="yes" />
+                        <RemoveFolder Id="ApplicationProgramsFolder2" On="uninstall" />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id="PersonalFolder" />
 
         </Directory>
 
@@ -59,9 +96,11 @@
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="RustcGroup" />
+                 <ComponentRef Id="RustShellShortcut" />
         </Feature>
         <Feature Id="Gcc"
                  Title="Linker and platform libraries"
+                 Description="If you choose to not install this component, you will require an external MinGW installation in order to create executables and libraries."
                  Display="1"
                  Level="1"
                  AllowAdvertise="no">
@@ -73,6 +112,7 @@
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="DocsGroup" />
+                 <ComponentRef Id="DocIndexShortcut" />
         </Feature>
         <Feature Id="Cargo"
                  Title="Cargo, the Rust package manager"
@@ -93,12 +133,18 @@
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <!--
-            Using the Wix UI library
-
-            With the the WixUI_FeatureTree dialog set the user goes
-            directly from the license agreement dialog to the feature
-            customization dialog.
+            The WixUI_Advanced dialog set provides the option of a one-click install like WixUI_Minimal, 
+            but it also allows directory and feature selection like other dialog sets if the user chooses 
+            to configure advanced options.
         -->
         <UIRef Id="WixUI_Advanced" />
+
+        <!-- 
+            WixUI_Advanced manipulates the ALLUSERS property, however, on recent versions of Windows, 
+            the proper way of selecting per-user or per-machine installation is via the MSIINSTALLPERUSER property.
+            (http://msdn.microsoft.com/en-us/library/windows/desktop/dd408068.aspx)
+        -->
+        <SetProperty Sequence="ui" Before="ExecuteAction" Id="ALLUSERS" Value="2" />
+        <SetProperty Sequence="ui" Before="ExecuteAction" Id="MSIINSTALLPERUSER" Value="1">WixAppFolder = "WixPerUserFolder"</SetProperty>
     </Product>
 </Wix>

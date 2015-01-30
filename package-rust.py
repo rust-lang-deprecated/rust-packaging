@@ -37,6 +37,12 @@ def run(args):
         print "call failed: " + str(args)
         sys.exit(1)
 
+# Move file with target overwrite
+def move_file(source, target):
+    try: os.remove(target)
+    except OSError: pass
+    shutil.move(source, target)
+
 INPUT_DIR = "./in"
 OUTPUT_DIR = "./out"
 TEMP_DIR = "./tmp"
@@ -130,7 +136,14 @@ cmd = "cat {0}/COPYRIGHT {0}/LICENSE-APACHE {0}/LICENSE-MIT > {1}".format(rustc_
 run(["sh", "-c", cmd])
 if make_msi:
     license_rtf = TEMP_DIR + "/LICENSE.rtf"
-    run(["pandoc", "-s", license_file, "-o", license_rtf])
+    # Convert plain text to RTF
+    with open(license_file, "rt") as input:
+        with open(license_rtf, "wt") as output:
+            output.write(r"{\rtf1\ansi\deff0{\fonttbl{\f0\fnil\fcharset0 Arial;}}\nowwrap\fs18"+"\n")
+            for line in input.readlines():
+                output.write(line)
+                output.write(r"\line ")
+            output.write("}")
 
 # Reconstruct the following variables from the Rust makefile from the version number.
 # Currently these are needed by the Windows installer.
@@ -294,7 +307,7 @@ if make_exe or make_msi:
         os.chdir(cwd)
 
         exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
-        shutil.move(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
+        move_file(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
     if make_msi:
         # Copy installer files, etc.
@@ -309,4 +322,4 @@ if make_exe or make_msi:
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"
-        shutil.move(exe_temp_dir + "/" + msifile, OUTPUT_DIR)
+        move_file(exe_temp_dir + "/" + msifile, OUTPUT_DIR + "/" + msifile)

@@ -118,7 +118,6 @@ tarball_list=",".join(inputs)
 package_name=COMBINED_PACKAGE_NAME + "-" + package_version + "-" + target
 run(["sh", "./rust-installer/combine-installers.sh",
      "--product-name=Rust",
-     "--verify-bin=rustc",
      "--rel-manifest-dir=rustlib",
      "--success-message=Rust-is-ready-to-roll",
      "--work-dir=" + TEMP_DIR + "/work",

@@ -118,9 +118,8 @@ tarball_list=",".join(inputs)
 package_name=COMBINED_PACKAGE_NAME + "-" + package_version + "-" + target
 run(["sh", "./rust-installer/combine-installers.sh",
      "--product-name=Rust",
-     "--verify-bin=rustc",
      "--rel-manifest-dir=rustlib",
-     "--success-message=Rust-is-ready-to-roll",
+     "--success-message=Rust-is-ready-to-roll.",
      "--work-dir=" + TEMP_DIR + "/work",
      "--output-dir=" + OUTPUT_DIR,
      "--package-name=" + package_name,
@@ -269,10 +268,10 @@ if make_exe or make_msi:
     run(["tar", "xzf", INPUT_DIR + "/" + docs_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + mingw_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + cargo_installer, "-C", exe_temp_dir])
-    orig_rustc_dir = exe_temp_dir + "/" + rustc_installer.replace(".tar.gz", "")
-    orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "")
-    orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "")
-    orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "")
+    orig_rustc_dir = exe_temp_dir + "/" + rustc_installer.replace(".tar.gz", "") + "/rustc"
+    orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "") + "/rust-docs"
+    orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "") + "/rust-mingw"
+    orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "") + "/cargo"
 
     # Move these to locations needed by the iscc script and wix sources
     rustc_dir = exe_temp_dir + "/rustc"
@@ -290,8 +289,6 @@ if make_exe or make_msi:
     for dir_and_component in dir_comp_pairs:
         dir_ = dir_and_component[0]
         component = dir_and_component[1]
-        for file_ in ["components", "install.sh", "rust-installer-version"]:
-            os.remove(dir_ + "/" + file_)
         os.remove(dir_ + "/manifest-" + component + ".in")
 
     if make_exe:

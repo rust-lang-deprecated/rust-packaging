@@ -228,26 +228,58 @@ print "CFG_BUILD: " + CFG_BUILD
 
 if make_pkg:
     print "creating .pkg"
+
+    assert docs_installer is not None
+    assert cargo_installer is not None
+
+    rustc_package_name = rustc_installer.replace(".tar.gz", "")
+    docs_package_name = docs_installer.replace(".tar.gz", "")
+    cargo_package_name = cargo_installer.replace(".tar.gz", "")
+
     os.mkdir(TEMP_DIR + "/pkg")
-    shutil.copytree(TEMP_DIR + "/work/" + package_name, TEMP_DIR + "/pkg/root")
+
+    shutil.copytree(TEMP_DIR + "/work/" + rustc_package_name, TEMP_DIR + "/pkg/rustc")
+    shutil.copytree(TEMP_DIR + "/work/" + cargo_package_name, TEMP_DIR + "/pkg/cargo")
+    shutil.copytree(TEMP_DIR + "/work/" + docs_package_name, TEMP_DIR + "/pkg/rust-docs")
+
     # The package root, extracted from a tarball has entirely wrong permissions.
     # This goes over everything and fixes them.
-    run(["chmod", "-R", "u+rwX,go+rX,go-w", TEMP_DIR + "/pkg/root"])
-    for filename in os.listdir(TEMP_DIR + "/pkg/root/bin"):
-        run(["chmod", "0755", TEMP_DIR + "/pkg/root/bin/" + filename])
+    run(["chmod", "-R", "u+rwX,go+rX,go-w", TEMP_DIR + "/pkg"])
+    for filename in os.listdir(TEMP_DIR + "/pkg/rustc/rustc/bin"):
+        run(["chmod", "0755", TEMP_DIR + "/pkg/rustc/rustc/bin/" + filename])
+    for filename in os.listdir(TEMP_DIR + "/pkg/cargo/cargo/bin"):
+        run(["chmod", "0755", TEMP_DIR + "/pkg/cargo/cargo/bin/" + filename])
 
-    # Remove everything under the root. These all shouldn't be installed.
-    for filename in os.listdir(TEMP_DIR + "/pkg/root"):
-        if os.path.isfile(TEMP_DIR + "/pkg/root/" + filename):
-            run(["rm", TEMP_DIR + "/pkg/root/" + filename])
+    # Copy the postinstall script that will execute install.sh
+    shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/rustc/postinstall")
+    run(["chmod", "a+x", TEMP_DIR + "/pkg/rustc/postinstall"])
+    shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/cargo/postinstall")
+    run(["chmod", "a+x", TEMP_DIR + "/pkg/cargo/postinstall"])
+    shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/rust-docs/postinstall")
+    run(["chmod", "a+x", TEMP_DIR + "/pkg/rust-docs/postinstall"])
+
+    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rustc " + \
+        "--scripts " + TEMP_DIR + "/pkg/rustc --nopayload " + TEMP_DIR + "/pkg/rustc.pkg"
+    run(["sh", "-c", pkgbuild_cmd])
+    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.cargo " + \
+        "--scripts " + TEMP_DIR + "/pkg/cargo --nopayload " + TEMP_DIR + "/pkg/cargo.pkg"
+    run(["sh", "-c", pkgbuild_cmd])
+    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rust-docs " + \
+        "--scripts " + TEMP_DIR + "/pkg/rust-docs --nopayload " + TEMP_DIR + "/pkg/rust-docs.pkg"
+    run(["sh", "-c", pkgbuild_cmd])
+
+    # Also create an 'uninstall' package
+    os.mkdir(TEMP_DIR + "/pkg/uninstall")
+    shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/uninstall/postinstall")
+    run(["chmod", "a+x", TEMP_DIR + "/pkg/uninstall/postinstall"])
+    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.uninstall " + \
+        "--scripts " + TEMP_DIR + "/pkg/uninstall --nopayload " + TEMP_DIR + "/pkg/uninstall.pkg"
+    run(["sh", "-c", pkgbuild_cmd])
 
     os.mkdir(TEMP_DIR + "/pkg/res")
     shutil.copyfile(TEMP_DIR + "/LICENSE.txt", TEMP_DIR + "/pkg/res/LICENSE.txt")
     shutil.copyfile("./pkg/welcome.rtf", TEMP_DIR + "/pkg/res/welcome.rtf")
     shutil.copyfile("./gfx/rust-logo.png", TEMP_DIR + "/pkg/res/rust-logo.png")
-    pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rust " + \
-        "--root " + TEMP_DIR + "/pkg/root " + TEMP_DIR + "/pkg/rust.pkg"
-    run(["sh", "-c", pkgbuild_cmd])
     productbuild_cmd = "productbuild --distribution ./pkg/Distribution.xml " + \
         "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \
         "--package-path " + TEMP_DIR + "/pkg"
@@ -262,6 +294,7 @@ if make_exe or make_msi:
     assert docs_installer is not None
     assert mingw_installer is not None
     assert cargo_installer is not None
+
     exe_temp_dir = TEMP_DIR + "/exe"
     os.mkdir(exe_temp_dir)
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])

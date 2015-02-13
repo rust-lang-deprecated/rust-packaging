@@ -310,7 +310,7 @@ if make_exe or make_msi:
         exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
         move_file(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
-    if make_msi:
+    if make_msi and False: # TODO: FIXME - bots don't seem to have WiX registered correctly
         # Copy installer files, etc.
         for f in ("Makefile", "rust.wxs", "remove-duplicates.xsl", "squash-components.xsl"):
             shutil.copy("./msi/" + f, exe_temp_dir)

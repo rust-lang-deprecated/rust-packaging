@@ -322,7 +322,7 @@ if make_exe or make_msi:
     for dir_and_component in dir_comp_pairs:
         dir_ = dir_and_component[0]
         component = dir_and_component[1]
-        os.remove(dir_ + "/manifest-" + component + ".in")
+        os.remove(dir_ + "/manifest.in")
 
     if make_exe:
         # Copy installer files, etc.

@@ -32,7 +32,7 @@ all: $(MSI).msi
 
 $(MSI).msi: $(OBJS)
 	$(LIGHT) $(LIGHT_FLAGS) -out $@ $(OBJS) -sice:ICE57 
-	# ICE57 wrongly complains about the shortcuts
+# ICE57 wrongly complains about the shortcuts
 
 .wxs.wixobj:
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ $^

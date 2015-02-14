@@ -7,6 +7,7 @@ import sys, os, subprocess, shutil, datetime
 make_exe = False
 make_pkg = False
 make_msi = False
+msi_sval = False # skip msi validation
 target = None
 
 for arg in sys.argv:
@@ -16,6 +17,8 @@ for arg in sys.argv:
         make_pkg = True
     elif arg == "--msi":
         make_msi = True
+    elif arg == "--msi-sval":
+        msi_sval = True
     elif "--target" in arg:
         target = arg.split("=")[1]
 
@@ -310,7 +313,7 @@ if make_exe or make_msi:
         exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"
         move_file(exe_temp_dir + "/" + exefile, OUTPUT_DIR + "/" + exefile)
 
-    if make_msi and False: # TODO: FIXME - bots don't seem to have WiX registered correctly
+    if make_msi:
         # Copy installer files, etc.
         for f in ("Makefile", "rust.wxs", "remove-duplicates.xsl", "squash-components.xsl"):
             shutil.copy("./msi/" + f, exe_temp_dir)
@@ -319,7 +322,7 @@ if make_exe or make_msi:
 
         cwd=os.getcwd()
         os.chdir(exe_temp_dir)
-        run(["make"])
+        run(["make", "SVAL=%i" % msi_sval])
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"

@@ -278,7 +278,6 @@ if make_pkg:
 
     os.mkdir(TEMP_DIR + "/pkg/res")
     shutil.copyfile(TEMP_DIR + "/LICENSE.txt", TEMP_DIR + "/pkg/res/LICENSE.txt")
-    shutil.copyfile("./pkg/welcome.rtf", TEMP_DIR + "/pkg/res/welcome.rtf")
     shutil.copyfile("./gfx/rust-logo.png", TEMP_DIR + "/pkg/res/rust-logo.png")
     productbuild_cmd = "productbuild --distribution ./pkg/Distribution.xml " + \
         "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \

@@ -25,6 +25,9 @@ RM ?= del
 HEAT_FLAGS= -nologo -gg -sfrag -srd -sreg
 CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dGccDir=$(GCCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR)
 LIGHT_FLAGS= -nologo -ext WixUIExtension
+ifeq ($(SVAL),1)
+	LIGHT_FLAGS += -sval
+endif
 
 .SUFFIXES: .wxs .wixobj
 

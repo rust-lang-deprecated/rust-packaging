@@ -110,8 +110,10 @@ os.mkdir(overlay_dir)
 shutil.copyfile(rustc_dir + "/COPYRIGHT", overlay_dir + "/COPYRIGHT")
 shutil.copyfile(rustc_dir + "/LICENSE-APACHE", overlay_dir + "/LICENSE-APACHE")
 shutil.copyfile(rustc_dir + "/LICENSE-MIT", overlay_dir + "/LICENSE-MIT")
-shutil.copyfile(rustc_dir + "/README.md", overlay_dir + "/README.md")
 shutil.copyfile(rustc_dir + "/version", overlay_dir + "/version")
+
+# Use a custom README that explains how to install
+shutil.copyfile("./etc/README.md", overlay_dir + "/README.md")
 
 # Combine the installers
 tarball_list=",".join(inputs)

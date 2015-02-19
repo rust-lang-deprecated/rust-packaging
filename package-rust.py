@@ -168,7 +168,7 @@ for line in open(os.path.join(rustc_dir, "version")):
 assert full_version is not None
 version_number = full_version.split("-")[0]
 prerelease_version = ""
-if "beta." in full_version:
+if "beta." in full_version or "alpha." in full_version:
     prerelease_version = "." + full_version.split(".")[-1]
 
 # Guess the channel from the version
@@ -193,9 +193,9 @@ if channel == "stable":
     CFG_UPGRADE_CODE="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6"
     CFG_MSI_VERSION=CFG_RELEASE_NUM
 elif channel == "beta":
-    CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
+    CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-alpha" + CFG_PRERELEASE_VERSION
     CFG_UPGRADE_CODE="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9"
-    CFG_MSI_VERSION=CFG_RELEASE_NUM + "." + CFG_PRERELEASE_VERSION
+    CFG_MSI_VERSION=CFG_RELEASE_NUM + CFG_PRERELEASE_VERSION
 elif channel == "nightly":
     CFG_PACKAGE_VERS="nightly"
     CFG_UPGRADE_CODE="B94FF1C2-2C7B-4859-A08B-546815516FDA"

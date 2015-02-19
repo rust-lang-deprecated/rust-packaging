@@ -25,7 +25,7 @@
             Source media for the installation.
             Specifies a single cab file to be embedded in the installer's .msi.
         -->
-        <MediaTemplate EmbedCab="yes" />
+        <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
         <!-- <Media Id="1" Layout="Files" /> -->
 
         <!-- Installation directory and files are defined in Files.wxs -->
@@ -133,14 +133,14 @@
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <!--
-            The WixUI_Advanced dialog set provides the option of a one-click install like WixUI_Minimal, 
-            but it also allows directory and feature selection like other dialog sets if the user chooses 
+            The WixUI_Advanced dialog set provides the option of a one-click install like WixUI_Minimal,
+            but it also allows directory and feature selection like other dialog sets if the user chooses
             to configure advanced options.
         -->
         <UIRef Id="WixUI_Advanced" />
 
-        <!-- 
-            WixUI_Advanced manipulates the ALLUSERS property, however, on recent versions of Windows, 
+        <!--
+            WixUI_Advanced manipulates the ALLUSERS property, however, on recent versions of Windows,
             the proper way of selecting per-user or per-machine installation is via the MSIINSTALLPERUSER property.
             (http://msdn.microsoft.com/en-us/library/windows/desktop/dd408068.aspx)
         -->

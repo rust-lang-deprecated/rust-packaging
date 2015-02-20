@@ -1,15 +1,41 @@
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+<!-- Upgrade code should be different for each platform -->
+<?if $(env.CFG_PLATFORM)="x64" ?>
+    <!-- UpgradeCode shoud stay the same for all MSI versions in channel -->
+    <?if $(env.CFG_CHANNEL)="stable" ?>
+        <?define UpgradeCode="B440B077-F8D1-4730-8E1D-D6D37702B4CE" ?>
+    <?elseif $(env.CFG_CHANNEL)="beta" ?>
+        <?define UpgradeCode="7205CEDC-CDA6-4B62-8E4E-4D19EC5D88FC" ?>
+    <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+        <?define UpgradeCode="622497D9-E0B1-448E-838A-4A33D0C5F82C" ?>
+    <?elseif $(env.CFG_CHANNEL)="dev" ?>
+        <?define UpgradeCode="7D32FD99-BB26-45CF-935D-1B0593BBDDBE" ?>
+    <?endif ?>
+<?else ?>
+    <?if $(env.CFG_CHANNEL)="stable" ?>
+        <?define UpgradeCode="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6" ?>
+    <?elseif $(env.CFG_CHANNEL)="beta" ?>
+        <?define UpgradeCode="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9" ?>
+    <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+        <?define UpgradeCode="B94FF1C2-2C7B-4859-A08B-546815516FDA" ?>
+    <?elseif $(env.CFG_CHANNEL)="dev" ?>
+        <?define UpgradeCode="7E6D1349-2773-4792-B8CD-EA2685D86A99" ?>
+    <?endif ?>
+<?endif ?>
+
     <Product Id="*"
         Name="Rust $(env.CFG_CHANNEL)"
         Language="1033"
         Version="$(env.CFG_MSI_VERSION)"
-        UpgradeCode="$(env.CFG_UPGRADE_CODE)"
+        UpgradeCode="$(var.UpgradeCode)"
         Manufacturer="Mozilla Foundation">
         <Package
             Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
             InstallerVersion="200"
             InstallPrivileges="elevated"
+            Platform="$(env.CFG_PLATFORM)"
             Compressed="yes" />
 
         <Icon Id="rust.ico" SourceFile="rust-logo.ico" />

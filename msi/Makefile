@@ -23,7 +23,7 @@ LIGHT="$(WIX)bin\light.exe"
 RM ?= del
 
 HEAT_FLAGS= -nologo -gg -sfrag -srd -sreg
-CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dGccDir=$(GCCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR)
+CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dGccDir=$(GCCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR) -arch $(CFG_PLATFORM)
 LIGHT_FLAGS= -nologo -ext WixUIExtension
 ifeq ($(SVAL),1)
 	LIGHT_FLAGS += -sval
@@ -34,7 +34,7 @@ endif
 all: $(MSI).msi
 
 $(MSI).msi: $(OBJS)
-	$(LIGHT) $(LIGHT_FLAGS) -out $@ $(OBJS) -sice:ICE57 
+	$(LIGHT) $(LIGHT_FLAGS) -out $@ $(OBJS) -sice:ICE57
 # ICE57 wrongly complains about the shortcuts
 
 .wxs.wixobj:

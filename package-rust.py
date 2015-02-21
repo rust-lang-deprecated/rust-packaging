@@ -4,6 +4,7 @@ import sys, os, subprocess, shutil, datetime
 
 # Parse configuration
 
+make_comb = True
 make_exe = False
 make_pkg = False
 make_msi = False
@@ -11,7 +12,9 @@ msi_sval = False # skip msi validation
 target = None
 
 for arg in sys.argv:
-    if arg == "--exe":
+    if arg == "--no-combined":
+        make_comb = False
+    elif arg == "--exe":
         make_exe = True
     elif arg == "--pkg":
         make_pkg = True
@@ -24,6 +27,7 @@ for arg in sys.argv:
 
 print
 print "target: " + str(target)
+print "combined: " + str(make_comb)
 print "exe: " + str(make_exe)
 print "pkg: " + str(make_pkg)
 print "msi: " + str(make_msi)
@@ -118,20 +122,21 @@ shutil.copyfile(rustc_dir + "/version", overlay_dir + "/version")
 # Use a custom README that explains how to install
 shutil.copyfile("./etc/README.md", overlay_dir + "/README.md")
 
-# Combine the installers
-tarball_list=",".join(inputs)
-package_name=COMBINED_PACKAGE_NAME + "-" + package_version + "-" + target
-run(["sh", "./rust-installer/combine-installers.sh",
-     "--product-name=Rust",
-     "--rel-manifest-dir=rustlib",
-     "--success-message=Rust-is-ready-to-roll.",
-     "--work-dir=" + TEMP_DIR + "/work",
-     "--output-dir=" + OUTPUT_DIR,
-     "--package-name=" + package_name,
-     "--legacy-manifest-dirs=rustlib,cargo",
-     "--input-tarballs=" + tarball_list,
-     "--non-installed-overlay=" + overlay_dir
-])
+if make_comb:
+    # Combine the installers
+    tarball_list=",".join(inputs)
+    package_name=COMBINED_PACKAGE_NAME + "-" + package_version + "-" + target
+    run(["sh", "./rust-installer/combine-installers.sh",
+         "--product-name=Rust",
+         "--rel-manifest-dir=rustlib",
+         "--success-message=Rust-is-ready-to-roll.",
+         "--work-dir=" + TEMP_DIR + "/work",
+         "--output-dir=" + OUTPUT_DIR,
+         "--package-name=" + package_name,
+         "--legacy-manifest-dirs=rustlib,cargo",
+         "--input-tarballs=" + tarball_list,
+         "--non-installed-overlay=" + overlay_dir
+    ])
 
 # Everything below here is used for producing non-rust-installer packaging
 

@@ -50,6 +50,17 @@
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
 
+        <!-- Workaround for WiX bug which causes installation of x64 MSI into "Program Files (x86)" -->
+        <?if $(sys.BUILDARCH)="x64" ?>
+            <CustomAction Id="Overwrite_WixSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]" Execute="immediate" />
+            <InstallUISequence>
+                <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+            </InstallUISequence>
+            <InstallExecuteSequence>
+                <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+            </InstallExecuteSequence>
+        <?endif ?>
+
         <!--
             Source media for the installation.
             Specifies a single cab file to be embedded in the installer's .msi.

@@ -97,7 +97,7 @@
                 <Directory Id="ApplicationProgramsFolder" Name="Rust">
                     <Component Id="RustShellShortcut" Guid="*">
                         <Shortcut Id="RustShell"
-                                  Name="Rust Shell"
+                                  Name="Rust $(env.CFG_CHANNEL) $(sys.BUILDARCH) Shell"
                                   Description="Opens Command Prompt with Rust tools directory added to the PATH"
                                   Target="[SystemFolder]CMD.exe"
                                   Arguments="/K path [APPLICATIONFOLDER]bin;%PATH%"
@@ -105,7 +105,7 @@
                             <Icon Id="rust2.ico" SourceFile="rust-logo.ico" />
                         </Shortcut>
                         <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
-                                       Name="RustShell"
+                                       Name="Rust_$(env.CFG_CHANNEL)_$(sys.BUILDARCH)_Shell"
                                        Type="integer"
                                        Value="1"
                                        KeyPath="yes" />
@@ -113,11 +113,11 @@
                     </Component>
                     <Component Id="DocIndexShortcut" Guid="*">
                         <Shortcut Id="RustDocs"
-                                  Name="Rust Documentation"
+                                  Name="Rust $(env.CFG_CHANNEL) $(sys.BUILDARCH) Documentation"
                                   Description="Opens Rust HTML documentation in the default browser"
                                   Target="[APPLICATIONFOLDER]share\doc\rust\html\index.html" />
                         <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
-                                       Name="RustDocs"
+                                       Name="Rust_$(env.CFG_CHANNEL)_$(sys.BUILDARCH)_Docs"
                                        Type="integer"
                                        Value="1"
                                        KeyPath="yes" />

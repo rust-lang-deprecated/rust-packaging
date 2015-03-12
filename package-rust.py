@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-import sys, os, subprocess, shutil, datetime
+import sys, os, subprocess, shutil, datetime, glob
 
 # Parse configuration
 
@@ -348,9 +348,10 @@ if make_exe or make_msi:
 
     if make_msi:
         # Copy installer files, etc.
-        for f in ("Makefile", "rust.wxs", "remove-duplicates.xsl", "squash-components.xsl"):
-            shutil.copy("./msi/" + f, exe_temp_dir)
-        shutil.copy("./gfx/rust-logo.ico", exe_temp_dir)
+        for f in glob.glob("./msi/*"):
+            shutil.copy(f, exe_temp_dir)
+        for f in glob.glob("./gfx/*"):
+            shutil.copy(f, exe_temp_dir)
         shutil.copy(TEMP_DIR + "/LICENSE.rtf", exe_temp_dir)
 
         cwd=os.getcwd()

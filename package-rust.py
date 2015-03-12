@@ -189,22 +189,17 @@ CFG_PRERELEASE_VERSION=prerelease_version
 # Logic reproduced from main.mk
 if channel == "stable":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
-    # UpgradeCode shoud stay the same for all MSI versions in channel
-    CFG_UPGRADE_CODE="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6"
     CFG_MSI_VERSION=CFG_RELEASE_NUM
 elif channel == "beta":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-alpha" + CFG_PRERELEASE_VERSION
-    CFG_UPGRADE_CODE="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9"
     CFG_MSI_VERSION=CFG_RELEASE_NUM + CFG_PRERELEASE_VERSION
 elif channel == "nightly":
     CFG_PACKAGE_VERS="nightly"
-    CFG_UPGRADE_CODE="B94FF1C2-2C7B-4859-A08B-546815516FDA"
     now=datetime.datetime.now()
     build=now.year*10+now.month*100+now.day
     CFG_MSI_VERSION=CFG_RELEASE_NUM+"."+str(build)
 elif channel == "dev":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-dev"
-    CFG_UPGRADE_CODE="7E6D1349-2773-4792-B8CD-EA2685D86A99"
     CFG_MSI_VERSION="255.255.65535.99999"
 else:
     print "unknown release channel"
@@ -219,15 +214,17 @@ os.environ["CFG_CHANNEL"] = CFG_CHANNEL
 os.environ["CFG_RELEASE_NUM"] = CFG_RELEASE_NUM
 os.environ["CFG_RELEASE"] = CFG_RELEASE
 os.environ["CFG_PACKAGE_NAME"] = CFG_PACKAGE_NAME
-os.environ["CFG_UPGRADE_CODE"] = CFG_UPGRADE_CODE
 os.environ["CFG_MSI_VERSION"] = CFG_MSI_VERSION
 os.environ["CFG_BUILD"] = CFG_BUILD
+if "x86_64" in target:
+    os.environ["CFG_PLATFORM"] = "x64"
+elif "i686":
+    os.environ["CFG_PLATFORM"] = "x86"
 
 print "CFG_CHANNEL: " + CFG_CHANNEL
 print "CFG_RELEASE_NUM: " + CFG_RELEASE_NUM
 print "CFG_RELEASE: " + CFG_RELEASE
 print "CFG_PACKAGE_NAME: " + CFG_PACKAGE_NAME
-print "CFG_UPGRADE_CODE: " + CFG_UPGRADE_CODE
 print "CFG_MSI_VERSION: " + CFG_MSI_VERSION
 print "CFG_BUILD: " + CFG_BUILD
 

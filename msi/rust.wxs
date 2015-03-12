@@ -1,10 +1,39 @@
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+<!-- Upgrade code should be different for each platform -->
+<?if $(sys.BUILDARCH)="x64" ?>
+    <!-- UpgradeCode shoud stay the same for all MSI versions in channel -->
+    <?if $(env.CFG_CHANNEL)="stable" ?>
+        <?define UpgradeCode="B440B077-F8D1-4730-8E1D-D6D37702B4CE" ?>
+    <?elseif $(env.CFG_CHANNEL)="beta" ?>
+        <?define UpgradeCode="7205CEDC-CDA6-4B62-8E4E-4D19EC5D88FC" ?>
+    <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+        <?define UpgradeCode="622497D9-E0B1-448E-838A-4A33D0C5F82C" ?>
+    <?elseif $(env.CFG_CHANNEL)="dev" ?>
+        <?define UpgradeCode="7D32FD99-BB26-45CF-935D-1B0593BBDDBE" ?>
+    <?endif ?>
+    <?define PlatformProgramFilesFolder="ProgramFiles64Folder" ?>
+<?elseif $(sys.BUILDARCH)="x86" ?>
+    <?if $(env.CFG_CHANNEL)="stable" ?>
+        <?define UpgradeCode="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6" ?>
+    <?elseif $(env.CFG_CHANNEL)="beta" ?>
+        <?define UpgradeCode="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9" ?>
+    <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+        <?define UpgradeCode="B94FF1C2-2C7B-4859-A08B-546815516FDA" ?>
+    <?elseif $(env.CFG_CHANNEL)="dev" ?>
+        <?define UpgradeCode="7E6D1349-2773-4792-B8CD-EA2685D86A99" ?>
+    <?endif ?>
+    <?define PlatformProgramFilesFolder="ProgramFilesFolder" ?>
+<?else ?>
+    <?error Unsupported value of sys.BUILDARCH=$(sys.BUILDARCH)?>
+<?endif ?>
+
     <Product Id="*"
         Name="Rust $(env.CFG_CHANNEL)"
         Language="1033"
         Version="$(env.CFG_MSI_VERSION)"
-        UpgradeCode="$(env.CFG_UPGRADE_CODE)"
+        UpgradeCode="$(var.UpgradeCode)"
         Manufacturer="Mozilla Foundation">
         <Package
             Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
@@ -21,6 +50,17 @@
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
 
+        <!-- Workaround for WiX bug which causes installation of x64 MSI into "Program Files (x86)" -->
+        <?if $(sys.BUILDARCH)="x64" ?>
+            <CustomAction Id="Overwrite_WixSetDefaultPerMachineFolder" Property="WixPerMachineFolder" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]" Execute="immediate" />
+            <InstallUISequence>
+                <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+            </InstallUISequence>
+            <InstallExecuteSequence>
+                <Custom Action="Overwrite_WixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+            </InstallExecuteSequence>
+        <?endif ?>
+
         <!--
             Source media for the installation.
             Specifies a single cab file to be embedded in the installer's .msi.
@@ -30,7 +70,7 @@
 
         <!-- Installation directory and files are defined in Files.wxs -->
         <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramFilesFolder">
+            <Directory Id="$(var.PlatformProgramFilesFolder)">
                 <Directory Id="APPLICATIONFOLDER" Name="Rust-$(env.CFG_CHANNEL)">
                     <!-- Root directories for every feature should have different IDs for correct work of heat.exe -->
                     <Directory Id="Rustc" Name="." />
@@ -40,13 +80,13 @@
                 </Directory>
             </Directory>
 
-            <Component Id="PathEnvPerMachine" Guid="{5C841EF4-EB7A-4A1E-9E0F-5477040E6339}">
+            <Component Id="PathEnvPerMachine" Guid="*">
                 <Condition>ALLUSERS=1 OR (ALLUSERS=2 AND Privileged)</Condition>
                 <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
                 <!-- [APPLICATIONFOLDER] contains trailing backslash -->
                 <Environment Id="PathPerMachine" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="yes" />
             </Component>
-            <Component Id="PathEnvPerUser" Guid="{20CFC7FC-5580-429D-9DE7-10DC5FD0314B}">
+            <Component Id="PathEnvPerUser" Guid="*">
                 <Condition>ALLUSERS="" OR (ALLUSERS=2 AND (NOT Privileged))</Condition>
                 <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]" Name="InstallDir" Type="string" Value="[APPLICATIONFOLDER]" KeyPath="yes" />
                 <Environment Id="PathPerUser" Name="PATH" Value="[APPLICATIONFOLDER]bin" Permanent="no" Part="last" Action="set" System="no" />
@@ -55,9 +95,9 @@
             <!-- Start Menu shortcuts -->
             <Directory Id="ProgramMenuFolder">
                 <Directory Id="ApplicationProgramsFolder" Name="Rust">
-                    <Component Id="RustShellShortcut" Guid="{7DADCD3B-CC53-48EC-84F1-4E6E74D8D542}">
+                    <Component Id="RustShellShortcut" Guid="*">
                         <Shortcut Id="RustShell"
-                                  Name="Rust Shell"
+                                  Name="Rust $(env.CFG_CHANNEL) $(sys.BUILDARCH) Shell"
                                   Description="Opens Command Prompt with Rust tools directory added to the PATH"
                                   Target="[SystemFolder]CMD.exe"
                                   Arguments="/K path [APPLICATIONFOLDER]bin;%PATH%"
@@ -65,19 +105,19 @@
                             <Icon Id="rust2.ico" SourceFile="rust-logo.ico" />
                         </Shortcut>
                         <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
-                                       Name="RustShell"
+                                       Name="Rust_$(env.CFG_CHANNEL)_$(sys.BUILDARCH)_Shell"
                                        Type="integer"
                                        Value="1"
                                        KeyPath="yes" />
                         <RemoveFolder Id="ApplicationProgramsFolder1" On="uninstall" />
                     </Component>
-                    <Component Id="DocIndexShortcut" Guid="{C13574AD-F9D4-41DF-A630-936C100C6303}">
+                    <Component Id="DocIndexShortcut" Guid="*">
                         <Shortcut Id="RustDocs"
-                                  Name="Rust Documentation"
+                                  Name="Rust $(env.CFG_CHANNEL) $(sys.BUILDARCH) Documentation"
                                   Description="Opens Rust HTML documentation in the default browser"
                                   Target="[APPLICATIONFOLDER]share\doc\rust\html\index.html" />
                         <RegistryValue Root="HKMU" Key="Software\[Manufacturer]\[ProductName]"
-                                       Name="RustDocs"
+                                       Name="Rust_$(env.CFG_CHANNEL)_$(sys.BUILDARCH)_Docs"
                                        Type="integer"
                                        Value="1"
                                        KeyPath="yes" />

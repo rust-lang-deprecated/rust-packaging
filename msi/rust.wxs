@@ -49,6 +49,8 @@
         <Property Id="ALLUSERS" Value="2" />
         <!-- txt format is not supported -->
         <WixVariable Id="WixUILicenseRtf" Value="LICENSE.rtf" />
+        <WixVariable Id="WixUIDialogBmp" Value="dialogbg.bmp" />
+        <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
 
         <!-- Workaround for WiX bug which causes installation of x64 MSI into "Program Files (x86)" -->
         <?if $(sys.BUILDARCH)="x64" ?>

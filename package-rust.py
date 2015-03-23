@@ -165,10 +165,16 @@ CFG_BUILD = None
 CFG_PACKAGE_VERS = None
 
 # Pull the version number out of the version file
+# Examples:
+# 1.0.0-alpha.2 (522d09dfe 2015-02-19) (built 2015-02-19)
+# 1.0.0-nightly (b0746ff19 2015-03-05) (built 2015-03-06)
+
+CFG_RELEASE_INFO = None
 full_version = None
 for line in open(os.path.join(rustc_dir, "version")):
     print "reported version: " + line
     full_version = line.split(" ")[0]
+    CFG_RELEASE_INFO = line.strip()
 
 assert full_version is not None
 version_number = full_version.split("-")[0]
@@ -191,21 +197,18 @@ CFG_RELEASE_NUM=version_number
 CFG_RELEASE=full_version
 CFG_PRERELEASE_VERSION=prerelease_version
 
+CFG_VER_MAJOR, CFG_VER_MINOR, CFG_VER_PATCH = version_number.split('.')
+CFG_VER_BUILD = str((datetime.date.today() - datetime.date(2000,1,1)).days) # days since Y2K
+
 # Logic reproduced from main.mk
 if channel == "stable":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
-    CFG_MSI_VERSION=CFG_RELEASE_NUM
 elif channel == "beta":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-alpha" + CFG_PRERELEASE_VERSION
-    CFG_MSI_VERSION=CFG_RELEASE_NUM + CFG_PRERELEASE_VERSION
 elif channel == "nightly":
     CFG_PACKAGE_VERS="nightly"
-    now=datetime.datetime.now()
-    build=now.year*10+now.month*100+now.day
-    CFG_MSI_VERSION=CFG_RELEASE_NUM+"."+str(build)
 elif channel == "dev":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-dev"
-    CFG_MSI_VERSION="255.255.65535.99999"
 else:
     print "unknown release channel"
     sys.exit(1)
@@ -215,23 +218,17 @@ CFG_PACKAGE_NAME=COMBINED_PACKAGE_NAME + "-" + CFG_PACKAGE_VERS
 CFG_BUILD=target
 CFG_CHANNEL=channel
 
-os.environ["CFG_CHANNEL"] = CFG_CHANNEL
-os.environ["CFG_RELEASE_NUM"] = CFG_RELEASE_NUM
-os.environ["CFG_RELEASE"] = CFG_RELEASE
-os.environ["CFG_PACKAGE_NAME"] = CFG_PACKAGE_NAME
-os.environ["CFG_MSI_VERSION"] = CFG_MSI_VERSION
-os.environ["CFG_BUILD"] = CFG_BUILD
 if "x86_64" in target:
-    os.environ["CFG_PLATFORM"] = "x64"
+    CFG_PLATFORM = "x64"
 elif "i686":
-    os.environ["CFG_PLATFORM"] = "x86"
+    CFG_PLATFORM = "x86"
 
-print "CFG_CHANNEL: " + CFG_CHANNEL
-print "CFG_RELEASE_NUM: " + CFG_RELEASE_NUM
-print "CFG_RELEASE: " + CFG_RELEASE
-print "CFG_PACKAGE_NAME: " + CFG_PACKAGE_NAME
-print "CFG_MSI_VERSION: " + CFG_MSI_VERSION
-print "CFG_BUILD: " + CFG_BUILD
+# Export all vars starting with CFG_
+cfgs = [pair for pair in locals().items() if pair[0].startswith("CFG_")]
+cfgs.sort()
+for k,v in cfgs:
+    print k,"=",v
+    os.environ[k] = v
 
 if make_pkg:
     print "creating .pkg"

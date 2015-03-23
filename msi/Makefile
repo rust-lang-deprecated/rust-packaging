@@ -5,7 +5,7 @@ else
 endif
 
 FILEGROUPS=RustcGroup.wxs GccGroup.wxs DocsGroup.wxs CargoGroup.wxs
-SRCS=rust.wxs $(FILEGROUPS)
+SRCS=rust.wxs ui.wxs rustwelcomedlg.wxs $(FILEGROUPS)
 
 RUSTCDIR ?= rustc
 GCCDIR ?= rust-mingw

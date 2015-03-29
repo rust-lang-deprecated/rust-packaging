@@ -62,7 +62,8 @@
         <Property Id="ARPURLINFOABOUT" Value="http://www.rust-lang.org/" />
         <Property Id="ARPCOMMENTS" Value="$(env.CFG_RELEASE_INFO)" />
         <!-- This is a dual-mode package. http://msdn.microsoft.com/en-us/library/windows/desktop/dd408068.aspx -->
-        <Property Id="ALLUSERS" Value="2" />
+        <Property Id="ALLUSERS" Value="2" Secure="yes" />
+        <Property Id="MSIINSTALLPERUSER" Secure="yes" />
         <!-- The actual install location (initialized below) -->
         <Property Id="INSTALLDIR" Secure="yes" />        
 
@@ -76,22 +77,24 @@
 
         <!-- Set ALLUSERS to match the previous installation mode, otherwise FindRelatedProducts will ignore 
              the previous installation. If both INSTALLDIR_USER and INSTALLDIR_MACHINE are set, prefer the former. -->
-        <SetProperty Sequence="both" Before="FindRelatedProducts"
+        <SetProperty Sequence="first" Before="FindRelatedProducts"
             Id="ALLUSERS" Value="{}">INSTALLDIR_USER</SetProperty>
 
-        <!-- Set default values if RegSearch found nothing, or if we not upgrading 
-             (is which case RegSearch *should* have yielded nothing, but... stale registry keys and whatnot) -->
+        <!-- Set default values if RegSearch found nothing, or if we not upgrading -->
         <SetProperty Sequence="both" Before="SetINSTALLDIR1"
-            Id="INSTALLDIR_USER" Value="[LocalAppDataFolder]Apps\[ApplicationFolderName]">INSTALLDIR_USER="" OR (NOT UPGRADE_DETECTED)</SetProperty>
+            Id="INSTALLDIR_USER" Value="[LocalAppDataFolder]Apps\[ApplicationFolderName]">NOT INSTALLDIR_USER</SetProperty>
         <SetProperty Sequence="both" Before="SetINSTALLDIR1"
-            Id="INSTALLDIR_MACHINE" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]">INSTALLDIR_MACHINE="" OR (NOT UPGRADE_DETECTED)</SetProperty>
-        
+            Id="INSTALLDIR_MACHINE" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]">NOT INSTALLDIR_MACHINE</SetProperty>
+
         <!-- Choose the default install location according to ALLUSERS (unless set from the command line) -->
-        <SetProperty Sequence="both" Action="SetINSTALLDIR1" Before="SetINSTALLDIR2" 
-            Id="INSTALLDIR" Value="[INSTALLDIR_USER]">INSTALLDIR="" AND (NOT ALLUSERS)</SetProperty>
+        <SetProperty Sequence="both" Action="SetINSTALLDIR1" Before="SetINSTALLDIR2"
+            Id="INSTALLDIR" Value="[INSTALLDIR_USER]">NOT INSTALLDIR AND NOT ALLUSERS</SetProperty>
         <SetProperty Sequence="both" Action="SetINSTALLDIR2" Before="CostFinalize"
-            Id="INSTALLDIR" Value="[INSTALLDIR_MACHINE]">INSTALLDIR="" AND (ALLUSERS)</SetProperty>
-        
+            Id="INSTALLDIR" Value="[INSTALLDIR_MACHINE]">NOT INSTALLDIR AND ALLUSERS</SetProperty>
+
+        <SetProperty Sequence="ui" Before="CostFinalize"
+            Id="WixAppFolder" Value="WixPerUserFolder">NOT ALLUSERS</SetProperty>
+
         <!-- UI sets ALLUSERS per user selection; progagate this choice to MSIINSTALLPERUSER before executing installation actions -->
         <SetProperty Sequence="ui" Before="ExecuteAction" 
             Id="MSIINSTALLPERUSER" Value="1">NOT ALLUSERS</SetProperty>

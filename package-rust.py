@@ -204,7 +204,7 @@ CFG_VER_BUILD = str((datetime.date.today() - datetime.date(2000,1,1)).days) # da
 if channel == "stable":
     CFG_PACKAGE_VERS=CFG_RELEASE_NUM
 elif channel == "beta":
-    CFG_PACKAGE_VERS=CFG_RELEASE_NUM + "-beta" + CFG_PRERELEASE_VERSION
+    CFG_PACKAGE_VERS="beta"
 elif channel == "nightly":
     CFG_PACKAGE_VERS="nightly"
 elif channel == "dev":

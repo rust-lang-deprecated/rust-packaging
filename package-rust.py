@@ -295,33 +295,38 @@ if make_exe or make_msi:
         print "creating .msi"
 
     assert docs_installer is not None
-    assert mingw_installer is not None
     assert cargo_installer is not None
 
     exe_temp_dir = TEMP_DIR + "/exe"
     os.mkdir(exe_temp_dir)
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + docs_installer, "-C", exe_temp_dir])
-    run(["tar", "xzf", INPUT_DIR + "/" + mingw_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + cargo_installer, "-C", exe_temp_dir])
     orig_rustc_dir = exe_temp_dir + "/" + rustc_installer.replace(".tar.gz", "") + "/rustc"
     orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "") + "/rust-docs"
-    orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "") + "/rust-mingw"
     orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "") + "/cargo"
 
     # Move these to locations needed by the iscc script and wix sources
     rustc_dir = exe_temp_dir + "/rustc"
     docs_dir = exe_temp_dir + "/rust-docs"
-    mingw_dir = exe_temp_dir + "/rust-mingw"
     cargo_dir = exe_temp_dir + "/cargo"
     os.rename(orig_rustc_dir, rustc_dir)
     os.rename(orig_docs_dir, docs_dir)
-    os.rename(orig_mingw_dir, mingw_dir)
     os.rename(orig_cargo_dir, cargo_dir)
+
+    if mingw_installer is not None:
+        run(["tar", "xzf", INPUT_DIR + "/" + mingw_installer, "-C", exe_temp_dir])
+        orig_mingw_dir = exe_temp_dir + "/" + mingw_installer.replace(".tar.gz", "") + "/rust-mingw"
+        mingw_dir = exe_temp_dir + "/rust-mingw"
+        os.rename(orig_mingw_dir, mingw_dir)
+    else:
+        assert "pc-windows-gnu" not in target
 
     # Remove the installer files we don't need
     dir_comp_pairs = [(rustc_dir, "rustc"), (docs_dir, "rust-docs"),
-                      (mingw_dir, "rust-mingw"), (cargo_dir, "cargo")]
+                      (cargo_dir, "cargo")]
+    if mingw_installer is not None:
+        dir_comp_pairs += [(mingw_dir, "rust-mingw")]
     for dir_and_component in dir_comp_pairs:
         dir_ = dir_and_component[0]
         component = dir_and_component[1]

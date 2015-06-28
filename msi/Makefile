@@ -4,7 +4,10 @@ else
   MSI = rust
 endif
 
-FILEGROUPS=RustcGroup.wxs GccGroup.wxs DocsGroup.wxs CargoGroup.wxs
+FILEGROUPS=RustcGroup.wxs DocsGroup.wxs CargoGroup.wxs
+ifeq ($(CFG_MINGW),1)
+FILEGROUPS += GccGroup.wxs
+endif
 SRCS=rust.wxs ui.wxs rustwelcomedlg.wxs $(FILEGROUPS)
 
 RUSTCDIR ?= rustc
@@ -23,7 +26,10 @@ LIGHT="$(WIX)bin\light.exe"
 RM ?= del
 
 HEAT_FLAGS= -nologo -gg -sfrag -srd -sreg
-CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dGccDir=$(GCCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR) -arch $(CFG_PLATFORM)
+CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR) -arch $(CFG_PLATFORM)
+ifeq ($(CFG_MINGW),1)
+CANDLE_FLAGS += -dGccDir=$(GCCDIR)
+endif
 LIGHT_FLAGS= -nologo -ext WixUIExtension
 ifeq ($(SVAL),1)
 	LIGHT_FLAGS += -sval

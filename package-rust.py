@@ -218,6 +218,11 @@ CFG_PACKAGE_NAME=COMBINED_PACKAGE_NAME + "-" + CFG_PACKAGE_VERS
 CFG_BUILD=target
 CFG_CHANNEL=channel
 
+if "pc-windows-gnu" in target:
+    CFG_MINGW="1"
+else:
+    CFG_MINGW="0"
+
 if "x86_64" in target:
     CFG_PLATFORM = "x64"
 elif "i686":

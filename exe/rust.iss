@@ -40,13 +40,17 @@ Name: modifypath; Description: &Add {app}\bin to your PATH (recommended)
 
 [Components]
 Name: rust; Description: "Rust compiler and standard crates"; Types: full compact custom; Flags: fixed
+#ifdef MINGW
 Name: gcc; Description: "Linker and platform libraries"; Types: full
+#endif
 Name: docs; Description: "HTML documentation"; Types: full
 Name: cargo; Description: "Cargo, the Rust package manager"; Types: full
 
 [Files]
 Source: "rustc/*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Components: rust
+#ifdef MINGW
 Source: "rust-mingw/*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Components: gcc
+#endif
 Source: "rust-docs/*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Components: docs
 Source: "cargo/*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; Components: cargo
 

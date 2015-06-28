@@ -342,7 +342,10 @@ if make_exe or make_msi:
 
         cwd=os.getcwd()
         os.chdir(exe_temp_dir)
-        run(["iscc", "rust.iss"])
+        args = ["iscc", "rust.iss"]
+        if "windows-gnu" in target:
+            args += ["/dMINGW"]
+        run(args)
         os.chdir(cwd)
 
         exefile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".exe"

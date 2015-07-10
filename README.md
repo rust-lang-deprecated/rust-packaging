@@ -44,5 +44,7 @@ installer. These only work when run on OS X or Windows.
 
 # License
 
-Licensed under the same terms as the Rust compiler, now and
-forevermore.
+This software is distributed under the terms of both the MIT license
+and/or the Apache License (Version 2.0), at your option.
+
+See [LICENSE-APACHE](LICENSE-APACHE), [LICENSE-MIT](LICENSE-MIT) for details.

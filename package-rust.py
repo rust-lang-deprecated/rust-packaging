@@ -75,7 +75,8 @@ if not os.path.isdir(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
 # The names of the packages that need to be combined via rust-installer
-components = [RUSTC_PACKAGE_NAME, "cargo", "rust-docs"]
+# NB: rust-std was recently separated from rustc. Not all channels will actually have rust-std yet
+components = [RUSTC_PACKAGE_NAME, "cargo", "rust-docs", "rust-std"]
 if "pc-windows-gnu" in target:
     components.append("rust-mingw")
 
@@ -86,18 +87,23 @@ rustc_installer = None
 cargo_installer = None
 docs_installer = None
 mingw_installer = None
+std_installer = None
 for component in components:
     component_installer = None
     for filename in os.listdir(INPUT_DIR):
         if target in filename and component in filename:
             # Hack: several components contain 'rust' in the name
-            if not (component == "rust" and ("rust-docs" in filename or "rust-mingw" in filename)):
+            # FIXME: Does this even do anything? 'rust' is not in the components list.
+            if not (component == "rust" and ("rust-docs" in filename or "rust-mingw" in filename or "rust-std" in filename)):
                 component_installer = filename
 
-    if not component_installer:
+    # FIXME coping with missing rust-std
+    if not component_installer and component != "rust-std":
         print "unable to find installer for component " + component + ", target " + target
         sys.exit(1)
-    inputs.append(INPUT_DIR + "/" + component_installer)
+    # FIXME coping with missing rust-std
+    if component_installer:
+        inputs.append(INPUT_DIR + "/" + component_installer)
 
     # Extract the version from the filename
     if component == RUSTC_PACKAGE_NAME:
@@ -111,7 +117,14 @@ for component in components:
         docs_installer = component_installer
     if component == "rust-mingw":
         mingw_installer = component_installer
+    if component == "rust-std":
+        std_installer = component_installer
 
+# HACK: When the rust-std package split from rustc, we needed to ensure
+# that during upgrades rustc was upgraded before rust-std, to avoid
+# rustc clobbering the std files during uninstall. This sort serves
+# to put rustc before rust-std in the component list.
+inputs.sort(reverse = True)
 
 assert package_version is not None
 assert rustc_installer is not None
@@ -253,12 +266,18 @@ if make_pkg:
     rustc_package_name = rustc_installer.replace(".tar.gz", "")
     docs_package_name = docs_installer.replace(".tar.gz", "")
     cargo_package_name = cargo_installer.replace(".tar.gz", "")
+    if std_installer:
+        std_package_name = std_installer.replace(".tar.gz", "")
+    else:
+        std_package_name = None
 
     os.mkdir(TEMP_DIR + "/pkg")
 
     shutil.copytree(TEMP_DIR + "/work/" + rustc_package_name, TEMP_DIR + "/pkg/rustc")
     shutil.copytree(TEMP_DIR + "/work/" + cargo_package_name, TEMP_DIR + "/pkg/cargo")
     shutil.copytree(TEMP_DIR + "/work/" + docs_package_name, TEMP_DIR + "/pkg/rust-docs")
+    if std_installer:
+        shutil.copytree(TEMP_DIR + "/work/" + std_package_name, TEMP_DIR + "/pkg/rust-std")
 
     # The package root, extracted from a tarball has entirely wrong permissions.
     # This goes over everything and fixes them.
@@ -275,6 +294,9 @@ if make_pkg:
     run(["chmod", "a+x", TEMP_DIR + "/pkg/cargo/postinstall"])
     shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/rust-docs/postinstall")
     run(["chmod", "a+x", TEMP_DIR + "/pkg/rust-docs/postinstall"])
+    if std_installer:
+        shutil.copyfile("./pkg/postinstall", TEMP_DIR + "/pkg/rust-std/postinstall")
+        run(["chmod", "a+x", TEMP_DIR + "/pkg/rust-std/postinstall"])
 
     pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rustc " + \
         "--scripts " + TEMP_DIR + "/pkg/rustc --nopayload " + TEMP_DIR + "/pkg/rustc.pkg"
@@ -285,6 +307,10 @@ if make_pkg:
     pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rust-docs " + \
         "--scripts " + TEMP_DIR + "/pkg/rust-docs --nopayload " + TEMP_DIR + "/pkg/rust-docs.pkg"
     run(["sh", "-c", pkgbuild_cmd])
+    if std_installer:
+        pkgbuild_cmd = "pkgbuild --identifier org.rust-lang.rust-std " + \
+            "--scripts " + TEMP_DIR + "/pkg/rust-std --nopayload " + TEMP_DIR + "/pkg/rust-std.pkg"
+        run(["sh", "-c", pkgbuild_cmd])
 
     # Also create an 'uninstall' package
     os.mkdir(TEMP_DIR + "/pkg/uninstall")
@@ -297,9 +323,14 @@ if make_pkg:
     os.mkdir(TEMP_DIR + "/pkg/res")
     shutil.copyfile(TEMP_DIR + "/LICENSE.txt", TEMP_DIR + "/pkg/res/LICENSE.txt")
     shutil.copyfile("./gfx/rust-logo.png", TEMP_DIR + "/pkg/res/rust-logo.png")
-    productbuild_cmd = "productbuild --distribution ./pkg/Distribution.xml " + \
-        "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \
-        "--package-path " + TEMP_DIR + "/pkg"
+    if std_installer:
+        productbuild_cmd = "productbuild --distribution ./pkg/Distribution.xml " + \
+            "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \
+            "--package-path " + TEMP_DIR + "/pkg"
+    else:
+        productbuild_cmd = "productbuild --distribution ./pkg/Distribution-old.xml " + \
+            "--resources " + TEMP_DIR + "/pkg/res " + OUTPUT_DIR + "/" + package_name + ".pkg " + \
+            "--package-path " + TEMP_DIR + "/pkg"
     run(["sh", "-c", productbuild_cmd])
 
 if make_exe or make_msi:
@@ -316,17 +347,26 @@ if make_exe or make_msi:
     run(["tar", "xzf", INPUT_DIR + "/" + rustc_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + docs_installer, "-C", exe_temp_dir])
     run(["tar", "xzf", INPUT_DIR + "/" + cargo_installer, "-C", exe_temp_dir])
+    if std_installer:
+        run(["tar", "xzf", INPUT_DIR + "/" + std_installer, "-C", exe_temp_dir])
     orig_rustc_dir = exe_temp_dir + "/" + rustc_installer.replace(".tar.gz", "") + "/rustc"
     orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "") + "/rust-docs"
     orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "") + "/cargo"
+    if std_installer:
+        orig_std_dir = exe_temp_dir + "/" + std_installer.replace(".tar.gz", "") + "/rust-std"
+    else:
+        orig_std_dir = None
 
     # Move these to locations needed by the iscc script and wix sources
     rustc_dir = exe_temp_dir + "/rustc"
     docs_dir = exe_temp_dir + "/rust-docs"
     cargo_dir = exe_temp_dir + "/cargo"
+    std_dir = exe_temp_dir + "/rust-std"
     os.rename(orig_rustc_dir, rustc_dir)
     os.rename(orig_docs_dir, docs_dir)
     os.rename(orig_cargo_dir, cargo_dir)
+    if std_installer:
+        os.rename(orig_std_dir, std_dir)
 
     if mingw_installer is not None:
         run(["tar", "xzf", INPUT_DIR + "/" + mingw_installer, "-C", exe_temp_dir])
@@ -339,6 +379,8 @@ if make_exe or make_msi:
     # Remove the installer files we don't need
     dir_comp_pairs = [(rustc_dir, "rustc"), (docs_dir, "rust-docs"),
                       (cargo_dir, "cargo")]
+    if std_installer:
+        dir_comp_pairs += [(std_dir, "rust-std")]
     if mingw_installer is not None:
         dir_comp_pairs += [(mingw_dir, "rust-mingw")]
     for dir_and_component in dir_comp_pairs:
@@ -356,7 +398,10 @@ if make_exe or make_msi:
 
         cwd=os.getcwd()
         os.chdir(exe_temp_dir)
-        args = ["iscc", "rust.iss"]
+        if std_installer:
+            args = ["iscc", "rust.iss"]
+        else:
+            args = ["iscc", "rust-old.iss"]
         if "windows-gnu" in target:
             args += ["/dMINGW"]
         run(args)
@@ -375,7 +420,10 @@ if make_exe or make_msi:
 
         cwd=os.getcwd()
         os.chdir(exe_temp_dir)
-        run(["make", "SVAL=%i" % msi_sval])
+        if std_installer:
+            run(["make", "SVAL=%i" % msi_sval])
+        else:
+            run(["make", "SVAL=%i" % msi_val, "Makefile-old"])
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"

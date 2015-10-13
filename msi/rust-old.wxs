@@ -136,7 +136,6 @@
                     <?endif?>
                     <Directory Id="Docs" Name="." />
                     <Directory Id="Cargo" Name="." />
-                    <Directory Id="Std" Name="." />
                 </Directory>
             </Directory>
 
@@ -201,16 +200,9 @@
                  <ComponentRef Id="RustShellShortcut" />
                  <ComponentRef Id="InstallDir" />
         </Feature>
-        <Feature Id="Std"
-                 Title="The Rust Standard Library"
-                 Display="2"
-                 Level="1"
-                 AllowAdvertise="no">
-                 <ComponentGroupRef Id="StdGroup" />
-        </Feature>
         <Feature Id="Cargo"
                  Title="Cargo, the Rust package manager"
-                 Display="3"
+                 Display="2"
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="CargoGroup" />
@@ -219,7 +211,7 @@
             <Feature Id="Gcc"
                      Title="Linker and platform libraries"
                      Description="If you choose to not install this component, you will require an external MinGW installation in order to create executables and libraries."
-                     Display="4"
+                     Display="3"
                      Level="1"
                      AllowAdvertise="no">
                      <ComponentGroupRef Id="GccGroup" />
@@ -227,7 +219,7 @@
         <?endif?>
         <Feature Id="Docs"
                  Title="HTML documentation"
-                 Display="5"
+                 Display="4"
                  Level="1"
                  AllowAdvertise="no">
                  <ComponentGroupRef Id="DocsGroup" />
@@ -236,7 +228,7 @@
         <Feature Id="Path"
                  Title="Add to PATH"
                  Description="Add Rust to PATH environment variable"
-                 Display="6"
+                 Display="5"
                  Level="5"
                  AllowAdvertise="no">
                  <ComponentRef Id="PathEnvPerMachine" />

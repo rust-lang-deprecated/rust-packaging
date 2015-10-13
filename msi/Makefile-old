@@ -4,11 +4,11 @@ else
   MSI = rust
 endif
 
-FILEGROUPS=RustcGroup.wxs DocsGroup.wxs CargoGroup.wxs StdGroup.wxs
+FILEGROUPS=RustcGroup.wxs DocsGroup.wxs CargoGroup.wxs
 ifeq ($(CFG_MINGW),1)
 FILEGROUPS += GccGroup.wxs
 endif
-SRCS=rust.wxs ui.wxs rustwelcomedlg.wxs $(FILEGROUPS)
+SRCS=rust-old.wxs ui.wxs rustwelcomedlg.wxs $(FILEGROUPS)
 
 RUSTCDIR ?= rustc
 GCCDIR ?= rust-mingw
@@ -57,9 +57,6 @@ DocsGroup.wxs:
 
 CargoGroup.wxs:
 	$(HEAT) dir $(CARGODIR) $(HEAT_FLAGS) -cg CargoGroup -dr Cargo -var var.CargoDir -out $@ -t remove-duplicates.xsl
-
-StdGroup.wxs:
-	$(HEAT) dir $(RUSTCDIR) $(HEAT_FLAGS) -cg StdGroup -dr Std -var var.StdDir -out $@
 
 clean:
 	$(RM) $(MSI).msi $(OBJS) $(FILEGROUPS)

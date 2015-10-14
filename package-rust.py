@@ -267,7 +267,7 @@ if make_pkg:
     docs_package_name = docs_installer.replace(".tar.gz", "")
     cargo_package_name = cargo_installer.replace(".tar.gz", "")
     if std_installer:
-        std_package_name = std_installer.replace(".tar.gz", "")
+        std_package_name = std_installer.replace(".tar.gz", "") + "-" + target
     else:
         std_package_name = None
 
@@ -353,7 +353,7 @@ if make_exe or make_msi:
     orig_docs_dir = exe_temp_dir + "/" + docs_installer.replace(".tar.gz", "") + "/rust-docs"
     orig_cargo_dir = exe_temp_dir + "/" + cargo_installer.replace(".tar.gz", "") + "/cargo"
     if std_installer:
-        orig_std_dir = exe_temp_dir + "/" + std_installer.replace(".tar.gz", "") + "/rust-std"
+        orig_std_dir = exe_temp_dir + "/" + std_installer.replace(".tar.gz", "") + "/rust-std-" + target
     else:
         orig_std_dir = None
 
@@ -423,7 +423,7 @@ if make_exe or make_msi:
         if std_installer:
             run(["make", "SVAL=%i" % msi_sval])
         else:
-            run(["make", "SVAL=%i" % msi_val, "Makefile-old"])
+            run(["make", "SVAL=%i" % msi_sval, "Makefile-old"])
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"

@@ -202,7 +202,7 @@
                  <ComponentRef Id="InstallDir" />
         </Feature>
         <Feature Id="Std"
-                 Title="The Rust Standard Library"
+                 Title="The Rust standard library"
                  Display="2"
                  Level="1"
                  AllowAdvertise="no">

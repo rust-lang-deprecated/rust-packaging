@@ -14,6 +14,7 @@ RUSTCDIR ?= rustc
 GCCDIR ?= rust-mingw
 DOCSDIR ?= rust-docs
 CARGODIR ?= cargo
+STDDIR ?= rust-std
 
 OBJS=$(SRCS:.wxs=.wixobj)
 # %WIX% variable contains path to WIX installdir (with trailing backslash) and is set by WiX installer
@@ -26,7 +27,7 @@ LIGHT="$(WIX)bin\light.exe"
 RM ?= del
 
 HEAT_FLAGS= -nologo -gg -sfrag -srd -sreg
-CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR) -arch $(CFG_PLATFORM)
+CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(CARGODIR) -dStdDir=$(STDDIR) -arch $(CFG_PLATFORM)
 ifeq ($(CFG_MINGW),1)
 CANDLE_FLAGS += -dGccDir=$(GCCDIR)
 endif
@@ -59,7 +60,7 @@ CargoGroup.wxs:
 	$(HEAT) dir $(CARGODIR) $(HEAT_FLAGS) -cg CargoGroup -dr Cargo -var var.CargoDir -out $@ -t remove-duplicates.xsl
 
 StdGroup.wxs:
-	$(HEAT) dir $(RUSTCDIR) $(HEAT_FLAGS) -cg StdGroup -dr Std -var var.StdDir -out $@
+	$(HEAT) dir $(STDDIR) $(HEAT_FLAGS) -cg StdGroup -dr Std -var var.StdDir -out $@
 
 clean:
 	$(RM) $(MSI).msi $(OBJS) $(FILEGROUPS)

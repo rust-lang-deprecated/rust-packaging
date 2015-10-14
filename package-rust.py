@@ -391,6 +391,7 @@ if make_exe or make_msi:
     if make_exe:
         # Copy installer files, etc.
         shutil.copyfile("./exe/rust.iss", exe_temp_dir + "/rust.iss")
+        shutil.copyfile("./exe/rust-old.iss", exe_temp_dir + "/rust-old.iss")
         shutil.copyfile("./exe/modpath.iss", exe_temp_dir + "/modpath.iss")
         shutil.copyfile("./exe/upgrade.iss", exe_temp_dir + "/upgrade.iss")
         shutil.copyfile("./gfx/rust-logo.ico", exe_temp_dir + "/rust-logo.ico")
@@ -423,7 +424,7 @@ if make_exe or make_msi:
         if std_installer:
             run(["make", "SVAL=%i" % msi_sval])
         else:
-            run(["make", "SVAL=%i" % msi_sval, "Makefile-old"])
+            run(["make", "SVAL=%i" % msi_sval, "-f", "Makefile-old"])
         os.chdir(cwd)
 
         msifile = CFG_PACKAGE_NAME + "-" + CFG_BUILD + ".msi"

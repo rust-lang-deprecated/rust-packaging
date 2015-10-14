@@ -13,6 +13,7 @@
     <choices-outline>
       <line choice="install">
 	<line choice="rustc"/>
+    <line choice="rust-std"/>
 	<line choice="cargo"/>
 	<line choice="rust-docs"/>
       </line>
@@ -49,10 +50,10 @@
         <pkg-ref id="org.rust-lang.cargo"/>
     </choice>
     <choice id="rust-std" visible="true"
-	    title="Standard Library" description="The Rust Standard Library."
+	    title="Standard Library" description="The Rust standard library."
 	    selected="(!choices.uninstall.selected &amp;&amp; choices['rust-std'].selected) || (choices.uninstall.selected &amp;&amp; choices.install.selected)"
 	    >
-        <pkg-ref id="org.rust-lang.rust-docs"/>
+        <pkg-ref id="org.rust-lang.rust-std"/>
     </choice>
     <choice id="rust-docs" visible="true"
 	    title="Documentation" description="HTML documentation."

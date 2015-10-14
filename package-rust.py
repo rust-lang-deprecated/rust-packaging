@@ -267,7 +267,7 @@ if make_pkg:
     docs_package_name = docs_installer.replace(".tar.gz", "")
     cargo_package_name = cargo_installer.replace(".tar.gz", "")
     if std_installer:
-        std_package_name = std_installer.replace(".tar.gz", "") + "-" + target
+        std_package_name = std_installer.replace(".tar.gz", "")
     else:
         std_package_name = None
 

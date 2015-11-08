@@ -229,7 +229,7 @@
                  Title="Add to PATH"
                  Description="Add Rust to PATH environment variable"
                  Display="5"
-                 Level="5"
+                 Level="1"
                  AllowAdvertise="no">
                  <ComponentRef Id="PathEnvPerMachine" />
                  <ComponentRef Id="PathEnvPerUser" />

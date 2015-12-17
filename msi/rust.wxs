@@ -2,41 +2,65 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
     <?if $(sys.BUILDARCH)="x64" ?>
-        <?define ArchSuffix=" (64-bit)" ?>
+        <?define ArchSuffix=" 64-bit" ?>
     <?else?>
         <?define ArchSuffix="" ?>
     <?endif?>
 
     <?if $(env.CFG_CHANNEL)="stable" ?>
-        <?define ProductName="Rust $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)$(var.ArchSuffix)" ?>
+        <?define ProductName="Rust $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR) ($(env.CFG_ABI)$(var.ArchSuffix))" ?>
     <?else?>
-        <?define ProductName="Rust $(env.CFG_CHANNEL) $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)$(var.ArchSuffix)" ?>
+        <?define ProductName="Rust $(env.CFG_CHANNEL) $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR) ($(env.CFG_ABI)$(var.ArchSuffix))" ?>
     <?endif?>
 
-    <?define BaseRegKey="Software\[Manufacturer]\Rust $(env.CFG_CHANNEL)$(var.ArchSuffix)\$(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)" ?>
+    <?define BaseRegKey="Software\[Manufacturer]\Rust $(env.CFG_CHANNEL) ($(env.CFG_ABI)$(var.ArchSuffix))\$(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)" ?>
 
     <!-- Upgrade code should be different for each platform -->
     <?if $(sys.BUILDARCH)="x64" ?>
-        <!-- UpgradeCode shoud stay the same for all MSI versions in channel -->
-        <?if $(env.CFG_CHANNEL)="stable" ?>
-            <?define UpgradeCode="B440B077-F8D1-4730-8E1D-D6D37702B4CE" ?>
-        <?elseif $(env.CFG_CHANNEL)="beta" ?>
-            <?define UpgradeCode="7205CEDC-CDA6-4B62-8E4E-4D19EC5D88FC" ?>
-        <?elseif $(env.CFG_CHANNEL)="nightly" ?>
-            <?define UpgradeCode="622497D9-E0B1-448E-838A-4A33D0C5F82C" ?>
-        <?elseif $(env.CFG_CHANNEL)="dev" ?>
-            <?define UpgradeCode="7D32FD99-BB26-45CF-935D-1B0593BBDDBE" ?>
+        <?if $(env.CFG_ABI)="GNU" ?>
+            <!-- UpgradeCode shoud stay the same for all MSI versions in channel -->
+            <?if $(env.CFG_CHANNEL)="stable" ?>
+                <?define UpgradeCode="B440B077-F8D1-4730-8E1D-D6D37702B4CE" ?>
+            <?elseif $(env.CFG_CHANNEL)="beta" ?>
+                <?define UpgradeCode="7205CEDC-CDA6-4B62-8E4E-4D19EC5D88FC" ?>
+            <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+                <?define UpgradeCode="622497D9-E0B1-448E-838A-4A33D0C5F82C" ?>
+            <?elseif $(env.CFG_CHANNEL)="dev" ?>
+                <?define UpgradeCode="7D32FD99-BB26-45CF-935D-1B0593BBDDBE" ?>
+            <?endif ?>
+        <?elseif $(env.CFG_ABI)="MSVC" ?>
+            <?if $(env.CFG_CHANNEL)="stable" ?>
+                <?define UpgradeCode="123039F9-68E3-44F1-AC9F-C78ADD4D0723" ?>
+            <?elseif $(env.CFG_CHANNEL)="beta" ?>
+                <?define UpgradeCode="ABC640B9-2AB5-4270-9A0D-E54E502A1CCA" ?>
+            <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+                <?define UpgradeCode="56263F12-4AA1-4FE1-AFAE-572915C4FA3E" ?>
+            <?elseif $(env.CFG_CHANNEL)="dev" ?>
+                <?define UpgradeCode="231A9544-7E39-4A60-A069-0EB3CA4BAB2E" ?>
+            <?endif ?>
         <?endif ?>
         <?define PlatformProgramFilesFolder="ProgramFiles64Folder" ?>
     <?elseif $(sys.BUILDARCH)="x86" ?>
-        <?if $(env.CFG_CHANNEL)="stable" ?>
-            <?define UpgradeCode="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6" ?>
-        <?elseif $(env.CFG_CHANNEL)="beta" ?>
-            <?define UpgradeCode="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9" ?>
-        <?elseif $(env.CFG_CHANNEL)="nightly" ?>
-            <?define UpgradeCode="B94FF1C2-2C7B-4859-A08B-546815516FDA" ?>
-        <?elseif $(env.CFG_CHANNEL)="dev" ?>
-            <?define UpgradeCode="7E6D1349-2773-4792-B8CD-EA2685D86A99" ?>
+        <?if $(env.CFG_ABI)="GNU" ?>
+            <?if $(env.CFG_CHANNEL)="stable" ?>
+                <?define UpgradeCode="1C7CADA5-D117-43F8-A356-DF15F9FBEFF6" ?>
+            <?elseif $(env.CFG_CHANNEL)="beta" ?>
+                <?define UpgradeCode="5229EAC1-AB7C-4A62-9881-6FAD2DE7D0F9" ?>
+            <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+                <?define UpgradeCode="B94FF1C2-2C7B-4859-A08B-546815516FDA" ?>
+            <?elseif $(env.CFG_CHANNEL)="dev" ?>
+                <?define UpgradeCode="7E6D1349-2773-4792-B8CD-EA2685D86A99" ?>
+            <?endif ?>
+        <?elseif $(env.CFG_ABI)="MSVC" ?>
+            <?if $(env.CFG_CHANNEL)="stable" ?>
+                <?define UpgradeCode="5805719C-45E9-4CF6-9CE7-1E8B57F3C243" ?>
+            <?elseif $(env.CFG_CHANNEL)="beta" ?>
+                <?define UpgradeCode="BC0731C1-BED1-424C-BE99-3589C35C84DE" ?>
+            <?elseif $(env.CFG_CHANNEL)="nightly" ?>
+                <?define UpgradeCode="FF193BBC-E73B-4FBD-ADE0-12F3CFC84145" ?>
+            <?elseif $(env.CFG_CHANNEL)="dev" ?>
+                <?define UpgradeCode="87DFC303-6492-4E9B-911E-56EAD56C5E58" ?>
+            <?endif ?>
         <?endif ?>
         <?define PlatformProgramFilesFolder="ProgramFilesFolder" ?>
     <?else ?>
@@ -56,7 +80,7 @@
             Compressed="yes" />
 
         <Icon Id="rust.ico" SourceFile="rust-logo.ico" />
-        <Property Id="ApplicationFolderName" Value="Rust $(env.CFG_CHANNEL) $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)" />
+        <Property Id="ApplicationFolderName" Value="Rust $(env.CFG_CHANNEL) $(env.CFG_ABI) $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)" />
         <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
         <Property Id="ARPPRODUCTICON" Value="rust.ico" />
         <Property Id="ARPURLINFOABOUT" Value="http://www.rust-lang.org/" />

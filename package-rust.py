@@ -242,8 +242,11 @@ CFG_CHANNEL=channel
 
 if "pc-windows-gnu" in target:
     CFG_MINGW="1"
+    CFG_ABI="GNU"
 else:
     CFG_MINGW="0"
+    if "pc-windows-msvc" in target:
+        CFG_ABI="MSVC"
 
 if "x86_64" in target:
     CFG_PLATFORM = "x64"

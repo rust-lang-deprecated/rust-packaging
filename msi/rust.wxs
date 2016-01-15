@@ -106,7 +106,7 @@
 
         <!-- Set default values if RegSearch found nothing, or if we not upgrading -->
         <SetProperty Sequence="both" Before="SetINSTALLDIR1"
-            Id="INSTALLDIR_USER" Value="[LocalAppDataFolder]Apps\[ApplicationFolderName]">NOT INSTALLDIR_USER</SetProperty>
+            Id="INSTALLDIR_USER" Value="[LocalAppDataFolder]Programs\[ApplicationFolderName]">NOT INSTALLDIR_USER</SetProperty>
         <SetProperty Sequence="both" Before="SetINSTALLDIR1"
             Id="INSTALLDIR_MACHINE" Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]">NOT INSTALLDIR_MACHINE</SetProperty>
 

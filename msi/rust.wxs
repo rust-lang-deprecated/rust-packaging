@@ -72,7 +72,7 @@
         Language="1033"
         Version="$(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR).$(env.CFG_VER_PATCH).$(env.CFG_VER_BUILD)"
         UpgradeCode="$(var.UpgradeCode)"
-        Manufacturer="Mozilla Foundation">
+        Manufacturer="The Rust Project Developers">
         <Package
             Comments="Rust is a systems programming language that runs blazingly fast, prevents almost all crashes, and eliminates data races."
             InstallerVersion="200"

@@ -154,6 +154,10 @@
         <!-- Specifies a single cab file to be embedded in the installer's .msi. -->
         <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
+        <!-- Send a WM_SETTINGCHANGE message to tell processes like explorer to update their
+             environments so any new command prompts get the updated %PATH% -->
+        <CustomActionRef Id="WixBroadcastEnvironmentChange" />
+
         <!-- Installation directory and files are defined in Files.wxs -->
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="$(var.PlatformProgramFilesFolder)">

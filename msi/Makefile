@@ -31,7 +31,7 @@ CANDLE_FLAGS= -nologo -dRustcDir=$(RUSTCDIR) -dDocsDir=$(DOCSDIR) -dCargoDir=$(C
 ifeq ($(CFG_MINGW),1)
 CANDLE_FLAGS += -dGccDir=$(GCCDIR)
 endif
-LIGHT_FLAGS= -nologo -ext WixUIExtension
+LIGHT_FLAGS= -nologo -ext WixUIExtension -ext WixUtilExtension
 ifeq ($(SVAL),1)
 	LIGHT_FLAGS += -sval
 endif

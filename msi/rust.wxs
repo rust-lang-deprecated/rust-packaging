@@ -83,7 +83,7 @@
         <Property Id="ApplicationFolderName" Value="Rust $(env.CFG_CHANNEL) $(env.CFG_ABI) $(env.CFG_VER_MAJOR).$(env.CFG_VER_MINOR)" />
         <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
         <Property Id="ARPPRODUCTICON" Value="rust.ico" />
-        <Property Id="ARPURLINFOABOUT" Value="http://www.rust-lang.org/" />
+        <Property Id="ARPURLINFOABOUT" Value="https://www.rust-lang.org/" />
         <Property Id="ARPCOMMENTS" Value="$(env.CFG_RELEASE_INFO)" />
         <!-- This is a dual-mode package. http://msdn.microsoft.com/en-us/library/windows/desktop/dd408068.aspx -->
         <Property Id="ALLUSERS" Value="2" Secure="yes" />

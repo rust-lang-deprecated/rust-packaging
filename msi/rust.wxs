@@ -127,6 +127,11 @@
         <SetProperty Sequence="execute" Before="CostFinalize"
             Id="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
 
+        <!-- Path of cmd.exe for the shortcut -->
+        <Property Id="SHORTCUTTARGET" Value="%windir%\System32\cmd.exe" />
+        <!-- Microsoft Installer will resolve any Enviroment Variables in the working directory at install time -->
+        <Property Id="SHORTCUTWKDIR" Value="%SystemDrive%\" />
+
         <InstallUISequence>
             <FindRelatedProducts After="AppSearch" />
         </InstallUISequence>
@@ -192,9 +197,9 @@
                         <Shortcut Id="RustShell"
                                   Name="$(var.ProductName) Shell"
                                   Description="Opens Command Prompt with Rust tools directory added to the PATH"
-                                  Target="[SystemFolder]CMD.exe"
+                                  Target="[SHORTCUTTARGET]"
                                   Arguments="/K path [INSTALLDIR]bin;%PATH%"
-                                  WorkingDirectory="PersonalFolder">
+                                  WorkingDirectory="SHORTCUTWKDIR">
                             <Icon Id="rust2.ico" SourceFile="rust-logo.ico" />
                         </Shortcut>
                         <RegistryValue Root="HKMU" Key="$(var.BaseRegKey)" Name="RustShell" Type="integer" Value="1" KeyPath="yes" />
@@ -210,8 +215,6 @@
                     </Component>
                 </Directory>
             </Directory>
-
-            <Directory Id="PersonalFolder" />
 
         </Directory>
 

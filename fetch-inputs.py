@@ -33,8 +33,9 @@ if target is None:
     sys.exit(1)
 
 SERVER_ADDRESS = os.getenv("RUST_DIST_SERVER", "https://static.rust-lang.org")
+CARGO_SERVER_ADDRESS = os.getenv("CARGO_DIST_SERVER",
+        "https://s3-us-west-1.amazonaws.com/rust-lang-ci/cargo-builds")
 RUST_DIST_FOLDER = "dist"
-CARGO_DIST_FOLDER = "cargo-dist"
 TEMP_DIR = "./tmp"
 IN_DIR = "./in"
 
@@ -107,9 +108,7 @@ for artifact in full_rust_artifacts:
     os.chdir(cwd)
 
 
-# Figure out corresponding cargo nightly. If the channel is nightly, then it's just the cargo nightly.
-# If it's beta or stable then it's paired with a specific revision from the cargo-snap.txt file.
-cargo_archive_date = None
+cargo_branch = 'master'
 if channel != "nightly":
     retval = subprocess.call(["tar", "xzf", IN_DIR + "/" + rustc_installer, "-C", TEMP_DIR])
     if retval != 0:
@@ -125,50 +124,26 @@ if channel != "nightly":
 
     assert version is not None
     print "cargo version key: " + version
+    cargo_branch = 'rust-' + version
 
-    # Search the cargo snap database for this version
-    for line in open("cargo-revs.txt"):
-        if version in line:
-            cargo_archive_date = line.split(":")[1].strip()
-            assert len(cargo_archive_date) > 0
-            break
+proc = subprocess.Popen(["curl",
+                         "-H", "Accept: application/vnd.github.3.sha",
+                         "-sSf",
+                         "https://api.github.com/repos/rust-lang/cargo/commits/" + cargo_branch],
+                        stdout=subprocess.PIPE)
+(cargo_rev, err) = proc.communicate()
+exit_code = proc.wait()
+if exit_code != 0:
+    print "failed to fetch most recent commit: " + err
+print "cargo rev: " + str(cargo_rev)
 
-    assert cargo_archive_date is not None
-
-print "cargo date: " + str(cargo_archive_date)
-
-# Download cargo manifest
-remote_cargo_dir = SERVER_ADDRESS + "/" + CARGO_DIST_FOLDER
-if cargo_archive_date is not None:
-    remote_cargo_dir += "/" + cargo_archive_date
-
-cargo_manifest_name = "channel-cargo-nightly"
-remote_cargo_manifest = remote_cargo_dir + "/" + cargo_manifest_name
-
-print "cargo manifest: " + remote_cargo_manifest
+# Download cargo
+artifact_name = "cargo-nightly-" + target + ".tar.gz"
+artifact = CARGO_SERVER_ADDRESS + "/" + cargo_rev + "/" + artifact_name
 cwd = os.getcwd()
-os.chdir(TEMP_DIR)
-retval = subprocess.call(["curl", "-f", "-O", remote_cargo_manifest])
+os.chdir(IN_DIR)
+retval = subprocess.call(["curl", "-f", "-O", artifact])
 if retval != 0:
-    print "downlading rust manifest failed"
+    print "downlading " + artifact + " failed"
     sys.exit(1)
 os.chdir(cwd)
-
-# Get list of cargo artifacts for target
-cargo_artifacts = []
-for line in open(os.path.join(TEMP_DIR, cargo_manifest_name)):
-    if target in line:
-        cargo_artifacts.append(line.rstrip())
-assert len(cargo_artifacts) > 0
-print "cargo artifacts: " + str(cargo_artifacts)
-
-# Download the cargo artifacts
-full_cargo_artifacts = [remote_cargo_dir + "/" + x for x in cargo_artifacts]
-for artifact in full_cargo_artifacts:
-    cwd = os.getcwd()
-    os.chdir(IN_DIR)
-    retval = subprocess.call(["curl", "-f", "-O", artifact])
-    if retval != 0:
-        print "downlading " + artifact + " failed"
-        sys.exit(1)
-    os.chdir(cwd)

@@ -34,7 +34,7 @@ if target is None:
 
 SERVER_ADDRESS = os.getenv("RUST_DIST_SERVER", "https://static.rust-lang.org")
 CARGO_SERVER_ADDRESS = os.getenv("CARGO_DIST_SERVER",
-        "https://s3-us-west-1.amazonaws.com/rust-lang-ci/cargo-builds")
+        "https://s3.amazonaws.com/rust-lang-ci/cargo-builds")
 RUST_DIST_FOLDER = "dist"
 TEMP_DIR = "./tmp"
 IN_DIR = "./in"
